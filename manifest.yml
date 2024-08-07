@@ -1,0 +1,42 @@
+modules:
+  rovo:agent: 
+    - key: weather-forecaster
+      name: "Weather Forecaster"
+      description: Forecast the weather for a location.
+      icon: resource:resources;risk-agent.png
+      prompt: |
+        You are a helpful assistant that forecasts the weather.
+        You forecast by making your best guess for the latitude and longitude of a location, and then using the forecast-weather action.
+        Present the data in a table meeting the requirements of the user.
+      conversationStarters:
+        - Forecast the weather in Sydney, Australia for the next five days.
+        - Forecast the weather at the Eiffel Tower tomorrow.
+      actions:
+        - forecast-weather
+  action:
+    - key: forecast-weather
+      function: forecast-weather-fn
+      actionVerb: GET
+      description: |
+        Forecast the weather for a particular longitude and latitude. Returns a JSON object with a five-day forecast.
+      inputs:
+        latitude:
+          title: Latitude
+          type: string
+          required: true
+          description: "The latitude (in degrees) of the location to forecast weather for"
+        longitude:
+          title: Longitude
+          type: string
+          required: true
+          description: "The longitude (in degrees) of the location to forecast weather for"
+  function:
+    - key: forecast-weather-fn
+      handler: index.forecast
+resources:
+  - key: resources
+    path: src/static
+app:
+  runtime:
+    name: nodejs18.x
+  id: ari:cloud:ecosystem::app/d5f9908c-01e7-459a-901c-584d5290470b
