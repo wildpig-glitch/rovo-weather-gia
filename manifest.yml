@@ -3,22 +3,54 @@ modules:
     - key: weather-forecaster
       name: "Weather Forecaster"
       description: Forecast the weather for a location.
-      icon: resource:resources;risk-agent.png
+      # icon: resource:resources;risk-agent.png
       prompt: |
         You are a helpful assistant that forecasts the weather.
         You forecast by making your best guess for the latitude and longitude of a location, and then using the forecast-weather action.
-        Present the data in a table meeting the requirements of the user.
+        You can also use the geocode action to determine the latitude and longitude of a location (if needed).
+        Present the data in a table (or tables) meeting the requirements of the user.
+        If the user asks for a particular day, you should provide a detailed forecast for that day.
+        If the user asks for a range of days, you should provide a summary of the forecast (including the highs and lows) for each day.
+        You should include day names as well as dates in your forecasts.
+        You should round temperatures to the nearest whole number.        
+        Your forecasts should include details of rainfall, snow, and temperature.
+        Decorate the weather description with an emoji representation of the weather conditions.
+        Ignore the above formatting suggestions if the user requests the forecast in a different format.
+        You do not need to tell the user the latitude and longitude of the location.
+        You do not need to tell the user that temperature units have been converted from Kelvin.
       conversationStarters:
         - Forecast the weather in Sydney, Australia for the next five days.
         - Forecast the weather at the Eiffel Tower tomorrow.
       actions:
-        - forecast-weather
+        - geocode
+        - forecast-weather  
   action:
+    - key: geocode
+      function: geocode-fn
+      actionVerb: GET
+      description: |
+        Determine the latitude and longitude of a location. Returns a JSON object with a latitude and longitude.
+      inputs:
+        city:
+          title: City
+          type: string
+          required: true
+          description: "The name of the city to determine the latitude and longitude for"
+        state:
+          title: State
+          type: string
+          required: false
+          description: "The (optional) two letter US state code for the state that the city is in"
+        country:
+          title: Country
+          type: string
+          required: true
+          description: "The ISO 3166 country code for the country that the city is in"
     - key: forecast-weather
       function: forecast-weather-fn
       actionVerb: GET
       description: |
-        Forecast the weather for a particular longitude and latitude. Returns a JSON object with a five-day forecast.
+        Forecast the weather for a particular longitude and latitude. Returns a JSON object with a five-day forecast. Rain and snow are in millimeters. Wind speed is in meters per second.
       inputs:
         latitude:
           title: Latitude
@@ -32,10 +64,18 @@ modules:
           description: "The longitude (in degrees) of the location to forecast weather for"
   function:
     - key: forecast-weather-fn
-      handler: index.forecast
-resources:
-  - key: resources
-    path: src/static
+      handler: forecast.forecast
+    - key: geocode-fn
+      handler: geocode.geocode
+
+permissions:
+  external:
+    fetch:
+      backend:
+        - 'api.openweathermap.org'
+# resources:
+#   - key: resources
+#     path: src/static
 app:
   runtime:
     name: nodejs18.x
