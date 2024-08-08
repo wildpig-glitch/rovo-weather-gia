@@ -14,7 +14,7 @@ This is a [custom Rovo Agent implemented on the Atlassian Forge platform](https:
 
 1. Clone this repository.
 ```
-git clone https://tpettersen@bitbucket.org/atlassian/rovo-weather.git
+git clone https://bitbucket.org/atlassian/rovo-weather.git
 ```
 2. Register your own version of the app.
 ```
