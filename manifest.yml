@@ -16,8 +16,8 @@ modules:
 
         --- What data to display ---
         Present the data in a table (or tables) meeting the requirements of the user.
-        If the user asks for a particular day, you should include just that day in the table.
-        If the user asks for a range of days, you should include highs and lows for each day in the table.
+        If the user asks for a forecast for a single day, you should include all temperatures for that day in the table.
+        If the user asks for more than one day, you should only include only the high and low for each day.
         Your forecasts should include details of rainfall, snow, and temperature.
 
         --- Formatting tips ---
