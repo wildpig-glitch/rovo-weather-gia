@@ -3,27 +3,30 @@ modules:
     - key: weather-forecaster
       name: "Weather Forecaster"
       description: Forecast the weather for a location.
-      # icon: resource:resources;risk-agent.png
       prompt: |
-        You are a helpful assistant that forecasts the weather.
-        You forecast by making your best guess for the latitude and longitude of a location, and then using the forecast-weather action.
-        You can also use the geocode action to determine the latitude and longitude of a location (if needed).
+        You are a helpful assistant that forecasts the weather for a given location.
+        If the location refers to a specific place, such as a city or landmark, you should be able to provide a forecast for that location.
+        For example, if they specify the Eiffel Tower, forecast the weather for Paris, France.
+        If the location specified by the user is too ambiguous, prompt them for a more specific location.
+        You forecast by geocoding the location using the geocode action, and then using the forecast-weather action.
+        You may only forecast weather for periods within the next five days.
         Present the data in a table (or tables) meeting the requirements of the user.
-        If the user asks for a particular day, you should provide a detailed forecast for that day.
-        If the user asks for a range of days, you should provide a summary of the forecast (including the highs and lows) for each day.
+        If the user asks for a particular day, you should include just that day in the table.
+        If the user asks for a range of days, you should include highs and lows for each day in the table.
         You should include day names as well as dates in your forecasts.
-        You should round temperatures to the nearest whole number.        
+        You should round temperatures to the nearest whole number.
         Your forecasts should include details of rainfall, snow, and temperature.
         Decorate the weather description with an emoji representation of the weather conditions.
-        Ignore the above formatting suggestions if the user requests the forecast in a different format.
         You do not need to tell the user the latitude and longitude of the location.
         You do not need to tell the user that temperature units have been converted from Kelvin.
+        You may ignore the above formatting suggestions where the user requests the forecast in a different format.
       conversationStarters:
         - Forecast the weather in Sydney, Australia for the next five days.
-        - Forecast the weather at the Eiffel Tower tomorrow.
+        - What's the weather like at the Eiffel Tower today?
+        - What is a good time for a coffee break during our offsite in Austin, TX tomorrow?
       actions:
         - geocode
-        - forecast-weather  
+        - forecast  
   action:
     - key: geocode
       function: geocode-fn
@@ -46,8 +49,8 @@ modules:
           type: string
           required: true
           description: "The ISO 3166 country code for the country that the city is in"
-    - key: forecast-weather
-      function: forecast-weather-fn
+    - key: forecast
+      function: forecast-fn
       actionVerb: GET
       description: |
         Forecast the weather for a particular longitude and latitude. Returns a JSON object with a five-day forecast. Rain and snow are in millimeters. Wind speed is in meters per second.
@@ -63,19 +66,17 @@ modules:
           required: true
           description: "The longitude (in degrees) of the location to forecast weather for"
   function:
-    - key: forecast-weather-fn
-      handler: forecast.forecast
     - key: geocode-fn
       handler: geocode.geocode
+    - key: forecast-fn
+      handler: forecast.forecast
 
 permissions:
   external:
     fetch:
       backend:
         - 'api.openweathermap.org'
-# resources:
-#   - key: resources
-#     path: src/static
+
 app:
   runtime:
     name: nodejs18.x

@@ -18,22 +18,15 @@ export async function forecast(payload, requestContext) {
 
   let forecast = [];
   for (let i = 0; i < body.list.length; i += 1) {
-    const { dt, main, weather, wind, rain, snow } = body.list[i];
-
-    // convert dt timestamp to local human readable date using tzOffset
-    const localTime = convertTimestampToHumanReadable(dt, tzOffset);
-
+    const { dt, main, weather, rain, snow } = body.list[i];
     forecast.push({
-      localTime,
+      localTime: convertTimestampToHumanReadable(dt, tzOffset),
       temperature: main.temp - 273.15, // convert to Celsius
       description: weather[0].description,
       rain,
       snow
     });
   }
-
-  console.log("forecast", forecast);
-
   return forecast;
 }
 
