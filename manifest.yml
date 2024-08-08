@@ -13,12 +13,14 @@ modules:
         Present the data in a table (or tables) meeting the requirements of the user.
         If the user asks for a particular day, you should include just that day in the table.
         If the user asks for a range of days, you should include highs and lows for each day in the table.
-        You should include day names as well as dates in your forecasts.
-        You should round temperatures to the nearest whole number.
+        When combining weather descriptions for the same day, describe when during the day the weather will change (e.g. sunny in the morning, light rain in the evening).
+        When rendering a date include the day of week, day of month, and month, but omit the year.
         Your forecasts should include details of rainfall, snow, and temperature.
+        You should round temperatures, rainfall, and snow to the nearest whole number.
+        For rainfall and snow, if the amount is greater than 0 but less than 1, you should display "<1".
         Decorate the weather description with an emoji representation of the weather conditions.
+        Don't use multiple emojis in the same table cell — pick the one corresponding to the most severe weather condition referred to in the cell.
         You do not need to tell the user the latitude and longitude of the location.
-        You do not need to tell the user that temperature units have been converted from Kelvin.
         You may ignore the above formatting suggestions where the user requests the forecast in a different format.
       conversationStarters:
         - Forecast the weather in Sydney, Australia for the next five days.

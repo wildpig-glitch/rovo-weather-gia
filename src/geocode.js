@@ -1,5 +1,8 @@
 import { fetch } from '@forge/api';
 
+/**
+ * Geocode a location and return its latitude and longitude.
+ */
 export async function geocode(payload, requestContext) {
   let { city, state, country } = payload;
   state = state || '';
@@ -10,8 +13,10 @@ export async function geocode(payload, requestContext) {
 
   if (body.length > 0) {
     const { lat, lon } = body[0];
+    console.log(`Geocoded location: ${city}, ${state}, ${country} -> ${lat}, ${lon}`);
     return { latitude: lat, longitude: lon };
   }
 
+  console.log(`Could not geocode location: ${city}, ${state}, ${country}`);
   return "Could not geocode location.";
 }
