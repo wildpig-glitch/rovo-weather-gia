@@ -49,7 +49,7 @@ You can use the [`forge tunnel`](https://developer.atlassian.com/platform/forge/
 
 ## License
 
-Copyright (c) 2020 Atlassian and others.
+Copyright (c) 2024 Atlassian and others.
 Apache 2.0 licensed, see [LICENSE](LICENSE) file.
 
 [![From Atlassian](https://raw.githubusercontent.com/atlassian-internal/oss-assets/master/banner-cheers.png)](https://www.atlassian.com)
