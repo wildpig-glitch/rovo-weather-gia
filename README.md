@@ -11,6 +11,7 @@ This is a [custom Rovo Agent implemented on the Atlassian Forge platform](https:
 - Install and configure the [Atlassian Forge CLI](https://developer.atlassian.com/platform/forge/getting-started/)
 - (Optional) Sign up for a [free Atlassian Cloud developer site](https://developer.atlassian.com/platform/forge/getting-started/)
 - Sign up for a [free OpenWeather API key](https://home.openweathermap.org/users/sign_up)
+- If needed, sign up for the [Forge Rovo Agents EAP](https://ecosystem.atlassian.net/servicedesk/customer/portal/1040/group/3499/create/18386)
 
 ## Getting Started
 
