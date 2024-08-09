@@ -1,5 +1,7 @@
 # Rovo + Forge Weather Forecaster
 
+[![Atlassian license](https://img.shields.io/badge/license-Apache%202.0-blue.svg?style=flat-square)](LICENSE)
+
 This is a [custom Rovo Agent implemented on the Atlassian Forge platform](https://developer.atlassian.com/platform/forge/manifest-reference/modules/rovo-agent/) used to forecast the weather using real time data sourced from [OpenWeather](openweathermap.org).
 
 ![screenshot.png](screenshot.png)
@@ -40,3 +42,14 @@ forge install
 ## More info
 
 Free OpenWeather API keys provide forecasts for three hour intervals going forward five days. For more granular weather data or longer forecasts (and a range of [other awesome weather-related APIs](https://openweathermap.org/api)) consider upgrading your OpenWeather account to a paid subscription.
+
+## Debugging
+
+You can use the [`forge tunnel`](https://developer.atlassian.com/platform/forge/change-the-frontend-with-forge-ui/#set-up-tunneling) command to run your Forge app locally. 
+
+## License
+
+Copyright (c) 2020 Atlassian and others.
+Apache 2.0 licensed, see [LICENSE](LICENSE) file.
+
+[![From Atlassian](https://raw.githubusercontent.com/atlassian-internal/oss-assets/master/banner-cheers.png)](https://www.atlassian.com)
