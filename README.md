@@ -19,26 +19,30 @@ This is a [custom Rovo Agent implemented on the Atlassian Forge platform](https:
 ```
 git clone https://bitbucket.org/atlassian/rovo-weather.git
 ```
-2. Register your own version of the app.
+2. Install dependencies.
+```
+npm install
+```
+3. Register your own version of the app.
 ```
 forge register
 ```
-3. Configure your [OpenWeather API key](https://home.openweathermap.org/users/sign_up).
+4. Configure your [OpenWeather API key](https://home.openweathermap.org/users/sign_up).
 ```
 forge variables set OPEN_WEATHER_KEY your_api_key_here
 ```
-4. Deploy your app.
+5. Deploy your app.
 ```
 forge deploy
 ```
-5. Install your app into your Confluence site.
+6. Install your app into your Confluence site.
 ```
 forge install
 ```
-6. Type `/ai` while editing a Confluence page and select **Atlassian Intelligence**
-7. Select **Browse Agents**
-8. Select **Weather Forecaster** (apply the ⭐️ to have it show up in the default agent menu)
-9. Start chatting about the weather!
+7. Type `/ai` while editing a Confluence page and select **Atlassian Intelligence**
+8. Select **Browse Agents**
+9. Select **Weather Forecaster** (apply the ⭐️ to have it show up in the default agent menu)
+10. Start chatting about the weather!
 
 ## More info
 
