@@ -15,7 +15,7 @@
   },
   "homepage": "https://bitbucket.org/atlassian/rovo-weather#readme",
   "dependencies": {
-    "@forge/api": "^3.9.0",
+    "@forge/api": "^5.0.0",
     "luxon": "^3.5.0"
   }
 }
