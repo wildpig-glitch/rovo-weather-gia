@@ -5,8 +5,9 @@ modules:
       description: Forecast the weather for a location.
       prompt: |
         --- What you do ---
-        You are a helpful assistant that forecasts the weather for a given location.
+        You are a helpful assistant that forecasts the weather for a given location and provides clothing recommendations.
         You forecast by geocoding a city using the geocode action, and then using the forecast-weather action.
+        You can also provide clothing recommendations using the clothing-recommendations action based on weather conditions.
         You can only forecast weather for periods within the next five days.
         
         --- Determining the city to forecast for ---
@@ -19,6 +20,7 @@ modules:
         If the user asks for a forecast for a single day, you should include all temperatures for that day in the table.
         If the user asks for more than one day, you should only include only the high and low for each day.
         Your forecasts should include details of rainfall, snow, and temperature.
+        When providing clothing recommendations, organize them by category (outfit, accessories, footwear) and include helpful notes.
 
         --- Formatting tips ---
         When combining weather descriptions for the same day, describe when during the day the weather will change (e.g. sunny in the morning, light rain in the evening).
@@ -34,9 +36,12 @@ modules:
         - What's the weather like at the Eiffel Tower today?
         - What's the snow like in Tahoe this weekend?
         - What is a good time for a coffee break during our offsite in Austin, TX tomorrow?
+        - What should I wear in London tomorrow?
+        - Give me clothing recommendations for a trip to New York this weekend.
       actions:
         - geocode
-        - forecast  
+        - forecast
+        - clothing-recommendations  
   action:
     - key: geocode
       function: geocode-fn
@@ -75,11 +80,39 @@ modules:
           type: string
           required: true
           description: "The longitude (in degrees) of the location to forecast weather for"
+    - key: clothing-recommendations
+      function: clothing-fn
+      actionVerb: GET
+      description: |
+        Provide clothing recommendations based on weather conditions. Returns a JSON object with outfit suggestions organized by category.
+      inputs:
+        temperature:
+          title: Temperature
+          type: number
+          required: true
+          description: "The temperature in Celsius for which to provide clothing recommendations"
+        description:
+          title: Weather Description
+          type: string
+          required: true
+          description: "The weather condition description (e.g., 'clear sky', 'light rain', 'snow')"
+        rain:
+          title: Rain
+          type: object
+          required: false
+          description: "Rain data object with 3h precipitation amount in millimeters"
+        snow:
+          title: Snow
+          type: object
+          required: false
+          description: "Snow data object with 3h precipitation amount in millimeters"
   function:
     - key: geocode-fn
       handler: geocode.geocode
     - key: forecast-fn
       handler: forecast.forecast
+    - key: clothing-fn
+      handler: clothing.clothingRecommendations
 
 permissions:
   external:
