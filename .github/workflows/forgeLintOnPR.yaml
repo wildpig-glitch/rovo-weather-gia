@@ -1,0 +1,27 @@
+name: Forge Lint on PR
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+      - name: Install Forge CLI
+        run: npm install -g @forge/cli
+      - name: Forge Lint
+        id: forge_lint
+        run: forge lint
+      - name: Post result to webhook
+        if: always()
+        run: |
+          STATUS="${{ job.status }}"
+          curl -X POST -H "Content-Type: application/json" \
+            -d "{\"branch\": \"${GITHUB_HEAD_REF}\", \"status\": \"${STATUS}\"}" \
+            https://your-webhook-url.example.com
