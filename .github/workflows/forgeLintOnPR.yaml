@@ -17,7 +17,9 @@ jobs:
         run: npm install -g @forge/cli
       - name: Forge Lint
         id: forge_lint
-        run: forge lint
+        run: |
+          sudo apt-get install -y script
+          script -q -c "forge lint" /dev/null
       - name: Post result to webhook
         if: always()
         run: |
