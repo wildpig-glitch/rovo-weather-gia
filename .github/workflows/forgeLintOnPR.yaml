@@ -23,28 +23,49 @@ jobs:
         env:
           FORGE_EMAIL: ${{ secrets.FORGE_EMAIL }}
           FORGE_API_TOKEN: ${{ secrets.FORGE_API_TOKEN }}
+          CI: true
+          FORGE_NO_PROMPT: true
         run: |
-          # Set CI environment variables
-          export CI=true
-          export FORGE_NO_PROMPT=true
-          
-          # Authenticate with Forge using API token
+          # Check if credentials are available
           if [ -n "$FORGE_EMAIL" ] && [ -n "$FORGE_API_TOKEN" ]; then
-            echo "Authenticating with Forge using API token..."
-            forge login --email "$FORGE_EMAIL" --token "$FORGE_API_TOKEN"
+            echo "Setting up Forge authentication via config files..."
+            
+            # Create Forge config directory
+            mkdir -p ~/.forge
+            
+            # Create credentials file directly (bypassing interactive login)
+            cat > ~/.forge/credentials << EOF
+{
+  "accounts": {
+    "$FORGE_EMAIL": {
+      "token": "$FORGE_API_TOKEN"
+    }
+  },
+  "current": "$FORGE_EMAIL"
+}
+EOF
+            
+            # Create settings file to disable prompts
+            cat > ~/.forge/settings.json << EOF
+{
+  "usage-analytics": false,
+  "check-update": false
+}
+EOF
+            
+            echo "SUCCESS: Forge authentication configured"
+            
+            # Verify authentication works
+            if forge whoami > /dev/null 2>&1; then
+              echo "SUCCESS: Authentication verified: $(forge whoami)"
+            else
+              echo "ERROR: Authentication verification failed"
+            fi
+            
           else
-            echo "WARNING: FORGE_EMAIL and FORGE_API_TOKEN secrets not set"
+            echo "ERROR: FORGE_EMAIL and FORGE_API_TOKEN secrets not set"
             echo "Please add these secrets to your repository settings"
-            echo "See: https://go.atlassian.com/dac/platform/forge/getting-started/#log-in-with-an-atlassian-api-token"
           fi
-          
-          # Disable analytics prompts for CI environment
-          forge settings set usage-analytics false || true
-          # Set other CI-friendly settings  
-          forge settings set check-update false || true
-          # Show current settings
-          echo "Forge CLI settings:"
-          forge settings list || true
 
       - name: Forge Lint
         id: forge_lint
@@ -52,26 +73,19 @@ jobs:
           CI: true
           FORGE_NO_PROMPT: true
         run: |
-          # Multiple approaches to ensure lint runs in non-interactive mode
-          echo "Attempting forge lint with multiple fallback methods..."
+          echo "Attempting forge lint..."
           
-          # Method 1: Direct with environment variables
+          # Try forge lint with multiple fallback approaches
           if forge lint --verbose > forge_lint_output.txt 2>&1; then
-            echo "Method 1 (direct) succeeded"
+            echo "SUCCESS: Forge lint succeeded"
           else
-            echo "Method 1 failed, trying Method 2..."
-            # Method 2: With input redirection
-            if forge lint --verbose < /dev/null > forge_lint_output.txt 2>&1; then
-              echo "Method 2 (input redirect) succeeded"
-            else
-              echo "Method 2 failed, trying Method 3..."
-              # Method 3: With timeout and echo
-              echo "" | timeout 60 forge lint --verbose > forge_lint_output.txt 2>&1 || true
-              echo "Method 3 (timeout + echo) completed"
-            fi
+            echo "WARNING: Forge lint had issues, trying with input redirection..."
+            forge lint --verbose < /dev/null > forge_lint_output.txt 2>&1 || true
           fi
           
-          echo "Final output size: $(cat forge_lint_output.txt | wc -c) characters"
+          echo "Output size: $(cat forge_lint_output.txt | wc -c) characters"
+          echo "Output preview:"
+          head -n 10 forge_lint_output.txt
 
       - name: Read Lint Output and Post to Webhook
         if: always()
@@ -85,9 +99,6 @@ jobs:
           echo "DEBUG: Captured output size: $(echo "$output" | wc -c) characters"
           echo "DEBUG: Branch: $BRANCH"
           echo "DEBUG: Status: $STATUS"
-          echo "DEBUG: Output preview (first 200 chars):"
-          echo "$output" | head -c 200
-          echo "..."
           
           # Create properly escaped JSON payload using jq
           payload=$(jq -n \
