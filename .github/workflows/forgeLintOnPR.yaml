@@ -26,42 +26,33 @@ jobs:
           CI: true
           FORGE_NO_PROMPT: true
         run: |
-          # Check if credentials are available
           if [ -n "$FORGE_EMAIL" ] && [ -n "$FORGE_API_TOKEN" ]; then
             echo "Setting up Forge authentication via config files..."
-            
-            # Create Forge config directory
             mkdir -p ~/.forge
-            
-            # Create credentials file directly (bypassing interactive login)
-            cat > ~/.forge/credentials << EOF
-{
-  "accounts": {
-    "$FORGE_EMAIL": {
-      "token": "$FORGE_API_TOKEN"
-    }
-  },
-  "current": "$FORGE_EMAIL"
-}
-EOF
-            
-            # Create settings file to disable prompts
-            cat > ~/.forge/settings.json << EOF
-{
-  "usage-analytics": false,
-  "check-update": false
-}
-EOF
-            
+            cat > ~/.forge/credentials << 'EOF'
+          {
+            "accounts": {
+              "PLACEHOLDER_EMAIL": {
+                "token": "PLACEHOLDER_TOKEN"
+              }
+            },
+            "current": "PLACEHOLDER_EMAIL"
+          }
+          EOF
+            sed -i "s/PLACEHOLDER_EMAIL/$FORGE_EMAIL/g" ~/.forge/credentials
+            sed -i "s/PLACEHOLDER_TOKEN/$FORGE_API_TOKEN/g" ~/.forge/credentials
+            cat > ~/.forge/settings.json << 'EOF'
+          {
+            "usage-analytics": false,
+            "check-update": false
+          }
+          EOF
             echo "SUCCESS: Forge authentication configured"
-            
-            # Verify authentication works
             if forge whoami > /dev/null 2>&1; then
               echo "SUCCESS: Authentication verified: $(forge whoami)"
             else
               echo "ERROR: Authentication verification failed"
             fi
-            
           else
             echo "ERROR: FORGE_EMAIL and FORGE_API_TOKEN secrets not set"
             echo "Please add these secrets to your repository settings"
@@ -74,15 +65,12 @@ EOF
           FORGE_NO_PROMPT: true
         run: |
           echo "Attempting forge lint..."
-          
-          # Try forge lint with multiple fallback approaches
           if forge lint --verbose > forge_lint_output.txt 2>&1; then
             echo "SUCCESS: Forge lint succeeded"
           else
             echo "WARNING: Forge lint had issues, trying with input redirection..."
             forge lint --verbose < /dev/null > forge_lint_output.txt 2>&1 || true
           fi
-          
           echo "Output size: $(cat forge_lint_output.txt | wc -c) characters"
           echo "Output preview:"
           head -n 10 forge_lint_output.txt
@@ -90,31 +78,23 @@ EOF
       - name: Read Lint Output and Post to Webhook
         if: always()
         run: |
-          # Read the lint output
           output=$(cat forge_lint_output.txt)
           STATUS="${{ job.status }}"
           BRANCH="${{ github.head_ref }}"
           WEBHOOK_URL="https://webhook.site/5a666d75-93ee-4297-bc4c-b85c7d54976f"
-          
           echo "DEBUG: Captured output size: $(echo "$output" | wc -c) characters"
           echo "DEBUG: Branch: $BRANCH"
           echo "DEBUG: Status: $STATUS"
-          
-          # Create properly escaped JSON payload using jq
           payload=$(jq -n \
             --arg branch "$BRANCH" \
             --arg status "$STATUS" \
             --arg output "$output" \
             '{branch: $branch, status: $status, output: $output}')
-          
           echo "DEBUG: Payload size: $(echo "$payload" | wc -c) characters"
           echo "DEBUG: JSON validation: $(echo "$payload" | jq . >/dev/null 2>&1 && echo "Valid" || echo "Invalid")"
-          
-          # Send to webhook
           response=$(curl -s -w "HTTP_CODE:%{http_code}" \
             -X POST \
             -H "Content-Type: application/json" \
             -d "$payload" \
             "$WEBHOOK_URL")
-          
           echo "Webhook response: $response"
