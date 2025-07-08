@@ -20,13 +20,27 @@ jobs:
         run: npm install -g @forge/cli
 
       - name: Configure Forge CLI for CI
+        env:
+          FORGE_EMAIL: ${{ secrets.FORGE_EMAIL }}
+          FORGE_API_TOKEN: ${{ secrets.FORGE_API_TOKEN }}
         run: |
           # Set CI environment variables
           export CI=true
           export FORGE_NO_PROMPT=true
+          
+          # Authenticate with Forge using API token
+          if [ -n "$FORGE_EMAIL" ] && [ -n "$FORGE_API_TOKEN" ]; then
+            echo "Authenticating with Forge using API token..."
+            forge login --email "$FORGE_EMAIL" --token "$FORGE_API_TOKEN"
+          else
+            echo "WARNING: FORGE_EMAIL and FORGE_API_TOKEN secrets not set"
+            echo "Please add these secrets to your repository settings"
+            echo "See: https://go.atlassian.com/dac/platform/forge/getting-started/#log-in-with-an-atlassian-api-token"
+          fi
+          
           # Disable analytics prompts for CI environment
           forge settings set usage-analytics false || true
-          # Set other CI-friendly settings
+          # Set other CI-friendly settings  
           forge settings set check-update false || true
           # Show current settings
           echo "Forge CLI settings:"
