@@ -234,4 +234,60 @@ Press Ctrl+C to cancel.
 ⚠ 4 issues (0 errors, 4 warnings)
   Run forge lint --fix to automatically fix 0 errors and 1 warning.
 
+[1m[7m%[27m[1m[0m                                                                                                                                                                                                                      ]7;file://G5FV4N609Q/Users/giannazzo/dev/rovo-weather-gia[0m[27m[24m[Jgiannazzo@G5FV4N609Q rovo-weather-gia % [K[?2004hfforge --help[?2004l
+Usage: forge [options] [command]
+
+Options:
+  --version                                   output the version number
+  --verbose                                   enable verbose mode
+  -h, --help                                  display help for command
+
+Commands:
+  autocomplete [options] [install|uninstall]  configures autocomplete for the Forge CLI
+  build [options]                             (Preview) build and upload your app
+  create [options] [name]                     create an app
+  deploy [options]                            deploy your app to an environment
+  eligibility [options]                       check if your app is eligible for certain programs like Runs on Atlassian
+  environments [options]                      manage app environments
+  feedback [options]                          let us know what you think about Forge
+  help [command]                              display help for command
+  install [options]                           manage app installations
+  lint [options]                              check the source files for common errors
+  login [options]                             log in to your Atlassian account
+  logout [options]                            log out of your Atlassian account
+  logs [options]                              view app logs
+  providers [options]                         manage external providers
+  register [options] [name]                   register an app you didn't create so you can run commands for it
+  settings [options]                          manage Forge CLI settings
+  storage [options]                           manage storage for your app
+  tunnel [options]                            start a tunnel to connect your local code with the app running in the development environment
+  uninstall [options]                         uninstall the app from an Atlassian site
+  variables [options]                         manage app environment variables
+  version [options]                           app version information
+  webtrigger [options]                        get a web trigger URL
+  whoami [options]                            display the account information of the logged in user
+[1m[7m%[27m[1m[0m                                                                                                                                                                                                                      ]7;file://G5FV4N609Q/Users/giannazzo/dev/rovo-weather-gia[0m[27m[24m[Jgiannazzo@G5FV4N609Q rovo-weather-gia % [K[?2004hfforge settings[?2004l
+Usage: forge settings [options] [command]
+
+manage Forge CLI settings
+
+Options:
+  --verbose                                 enable verbose mode
+  -h, --help                                display help for command
+
+Commands:
+  help [command]                            display help for command
+  list [options]                            list Forge CLI settings
+  set [options] <setting> <boolean|string>  update Forge CLI setting (choices: usage-analytics, default-environment)
+[1m[7m%[27m[1m[0m                                                                                                                                                                                                                      ]7;file://G5FV4N609Q/Users/giannazzo/dev/rovo-weather-gia[0m[27m[24m[Jgiannazzo@G5FV4N609Q rovo-weather-gia % [K[?2004hforge settings list[?2004l
+[33mWarning: Your version of Forge CLI is out of date. We recommend you update to the latest version to get the latest features and bug fixes.[39m
+[33mRun [1mnpm install -g @forge/cli@latest[22m to update from version [1m12.0.0[22m to [1m12.1.0[22m.[39m
+[33m[39m
+┌─────────────────────┬──────────────────────────────────────────────────────────────────┬─────────────┐
+│ Setting             │ Description                                                      │ Value       │
+├─────────────────────┼──────────────────────────────────────────────────────────────────┼─────────────┤
+│ usage-analytics     │ Allow Forge to collect CLI usage and error reporting information │ true        │
+├─────────────────────┼──────────────────────────────────────────────────────────────────┼─────────────┤
+│ default-environment │ Change your default development environment                      │ development │
+└─────────────────────┴──────────────────────────────────────────────────────────────────┴─────────────┘
 [1m[7m%[27m[1m[0m                                                                                                                                                                                                                      ]7;file://G5FV4N609Q/Users/giannazzo/dev/rovo-weather-gia[0m[27m[24m[Jgiannazzo@G5FV4N609Q rovo-weather-gia % [K[?2004h

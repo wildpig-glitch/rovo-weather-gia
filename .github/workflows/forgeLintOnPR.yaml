@@ -22,7 +22,7 @@ jobs:
       - name: Forge Lint
         id: forge_lint
         run: |
-          stdbuf -oL forge lint > forge_lint_output.txt 2>&1
+          echo "" | timeout 60 forge lint > forge_lint_output.txt 2>&1 || true
 
       - name: Read Lint Output
         id: read_output
