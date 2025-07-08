@@ -27,11 +27,11 @@ jobs:
         run: |
           forge settings set usage-analytics true
           forge lint > forge_lint_output.txt 2>&1
-
       - name: Read Lint Output and Post to Webhook
         if: always()
         run: |
           output=$(cat forge_lint_output.txt)
+          echo "Lint output: $output"
           STATUS="${{ job.status }}"
           BRANCH="${{ github.head_ref }}"
           WEBHOOK_URL="https://webhook.site/5a666d75-93ee-4297-bc4c-b85c7d54976f"
