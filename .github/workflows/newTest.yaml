@@ -1,4 +1,4 @@
-name: Forge Lint on PR
+name: Simpler Forge Lint on PR
 
 on:
   pull_request:
