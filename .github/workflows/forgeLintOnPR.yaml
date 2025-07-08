@@ -5,24 +5,32 @@ on:
     types: [opened, synchronize, reopened]
 
 jobs:
-  deploy:
+  lint:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '18'
+
       - name: Install Forge CLI
         run: npm install -g @forge/cli
+
       - name: Forge Lint
         id: forge_lint
         run: |
-          script -q -c "forge lint" /dev/null
+          output=$(forge lint 2>&1)
+          echo "output<<EOF" >> $GITHUB_ENV
+          echo "$output" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+
       - name: Post result to webhook
         if: always()
         run: |
           STATUS="${{ job.status }}"
+          OUTPUT="${{ env.output }}"
           curl -X POST -H "Content-Type: application/json" \
-            -d "{\"branch\": \"${GITHUB_HEAD_REF}\", \"status\": \"${STATUS}\"}" \
+            -d "{\"branch\": \"${GITHUB_HEAD_REF}\", \"status\": \"${STATUS}\", \"output\": \"${OUTPUT}\"}" \
             https://your-webhook-url.example.com
