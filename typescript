@@ -290,4 +290,33 @@ Commands:
 ├─────────────────────┼──────────────────────────────────────────────────────────────────┼─────────────┤
 │ default-environment │ Change your default development environment                      │ development │
 └─────────────────────┴──────────────────────────────────────────────────────────────────┴─────────────┘
+[1m[7m%[27m[1m[0m                                                                                                                                                                                                                      ]7;file://G5FV4N609Q/Users/giannazzo/dev/rovo-weather-gia[0m[27m[24m[Jgiannazzo@G5FV4N609Q rovo-weather-gia % [K[?2004hlls[?2004l
+CODE_OF_CONDUCT.md		OWNER				forge lint			package.json			typescript
+CONTRIBUTING.md			README.md			manifest.yml			screenshot.png
+LICENSE				complete_webhook_test.sh	package-lock.json		src
+[1m[7m%[27m[1m[0m                                                                                                                                                                                                                      ]7;file://G5FV4N609Q/Users/giannazzo/dev/rovo-weather-gia[0m[27m[24m[Jgiannazzo@G5FV4N609Q rovo-weather-gia % [K[?2004h../complete_webhook_test.sh[1m [0m[0m [?2004l
+=== COMPLETE WEBHOOK TEST ===
+This script tests the entire pipeline: forge lint -> JSON creation -> webhook delivery
+
+Step 1: Running forge lint...
+Step 2: Reading output...
+DEBUG: Captured output size:     1241 characters
+DEBUG: Branch: test-branch
+DEBUG: Status: success
+DEBUG: Output preview (first 200 chars):
+Warning: Your version of Forge CLI is out of date. We recommend you update to the latest version to get the latest features and bug fixes.
+Run npm install -g @forge/cli@latest to update from version 1...
+
+Step 3: Creating JSON payload...
+DEBUG: Payload size:     1326 characters
+DEBUG: JSON validation: Valid
+
+Step 4: Testing webhook delivery...
+Sending to real webhook: https://webhook.site/5a666d75-93ee-4297-bc4c-b85c7d54976f
+Webhook response: This URL has no default content configured. <a href="https://webhook.site/#!/edit/5a666d75-93ee-4297-bc4c-b85c7d54976f">Change response in Webhook.site</a>.HTTP_CODE:200
+
+=== TEST COMPLETE ===
+✅ Forge lint output captured successfully
+✅ JSON payload created and validated
+✅ Webhook delivery tested
 [1m[7m%[27m[1m[0m                                                                                                                                                                                                                      ]7;file://G5FV4N609Q/Users/giannazzo/dev/rovo-weather-gia[0m[27m[24m[Jgiannazzo@G5FV4N609Q rovo-weather-gia % [K[?2004h
