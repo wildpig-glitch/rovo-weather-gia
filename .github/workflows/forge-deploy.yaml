@@ -102,12 +102,10 @@ jobs:
       - name: Install Forge CLI
         run: npm install -g @forge/cli
 
-      - name: Configure Forge CLI
+      - name: Deploy to Development
         env:
           FORGE_EMAIL: ${{ secrets.FORGE_EMAIL }}
           FORGE_API_TOKEN: ${{ secrets.FORGE_API_TOKEN }}
-
-      - name: Deploy to Development
         run: |
           echo "🚀 Deploying to Development environment..."
           forge deploy --environment development
@@ -130,15 +128,10 @@ jobs:
       - name: Install Forge CLI
         run: npm install -g @forge/cli
 
-      - name: Configure Forge CLI
+      - name: Deploy to Test
         env:
           FORGE_EMAIL: ${{ secrets.FORGE_EMAIL }}
           FORGE_API_TOKEN: ${{ secrets.FORGE_API_TOKEN }}
-
-      - name: Deploy to Test
-        env:
-          CI: true
-          FORGE_NO_PROMPT: true
         run: |
           echo "🚀 Deploying to Test environment..."
           forge deploy --environment test
@@ -161,15 +154,10 @@ jobs:
       - name: Install Forge CLI
         run: npm install -g @forge/cli
 
-      - name: Configure Forge CLI
+      - name: Deploy to Production
         env:
           FORGE_EMAIL: ${{ secrets.FORGE_EMAIL }}
           FORGE_API_TOKEN: ${{ secrets.FORGE_API_TOKEN }}
-
-      - name: Deploy to Production
-        env:
-          CI: true
-          FORGE_NO_PROMPT: true
         run: |
           echo "🚀 Deploying to Production environment..."
           if [ "${{ inputs.force_deploy }}" = "true" ]; then
