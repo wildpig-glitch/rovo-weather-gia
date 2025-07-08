@@ -22,7 +22,12 @@ jobs:
       - name: Forge Lint
         id: forge_lint
         run: |
-          output=$(forge lint 2>&1)
+          script -q -c "forge lint" forge_lint_output.txt
+
+      - name: Read Lint Output
+        id: read_output
+        run: |
+          output=$(cat forge_lint_output.txt)
           echo "output<<EOF" >> $GITHUB_ENV
           echo "$output" >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV
