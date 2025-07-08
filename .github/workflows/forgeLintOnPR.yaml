@@ -22,7 +22,7 @@ jobs:
       - name: Forge Lint
         id: forge_lint
         run: |
-          script -q -c "forge lint" forge_lint_output.txt
+          stdbuf -oL forge lint > forge_lint_output.txt 2>&1
 
       - name: Read Lint Output
         id: read_output
