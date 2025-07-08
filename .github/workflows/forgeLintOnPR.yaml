@@ -19,10 +19,45 @@ jobs:
       - name: Install Forge CLI
         run: npm install -g @forge/cli
 
+      - name: Configure Forge CLI for CI
+        run: |
+          # Set CI environment variables
+          export CI=true
+          export FORGE_NO_PROMPT=true
+          # Disable analytics prompts for CI environment
+          forge settings set usage-analytics false || true
+          # Set other CI-friendly settings
+          forge settings set check-update false || true
+          # Show current settings
+          echo "Forge CLI settings:"
+          forge settings list || true
+
       - name: Forge Lint
         id: forge_lint
+        env:
+          CI: true
+          FORGE_NO_PROMPT: true
         run: |
-          echo "" | timeout 60 forge lint > forge_lint_output.txt 2>&1 || true
+          # Multiple approaches to ensure lint runs in non-interactive mode
+          echo "Attempting forge lint with multiple fallback methods..."
+          
+          # Method 1: Direct with environment variables
+          if forge lint --verbose > forge_lint_output.txt 2>&1; then
+            echo "Method 1 (direct) succeeded"
+          else
+            echo "Method 1 failed, trying Method 2..."
+            # Method 2: With input redirection
+            if forge lint --verbose < /dev/null > forge_lint_output.txt 2>&1; then
+              echo "Method 2 (input redirect) succeeded"
+            else
+              echo "Method 2 failed, trying Method 3..."
+              # Method 3: With timeout and echo
+              echo "" | timeout 60 forge lint --verbose > forge_lint_output.txt 2>&1 || true
+              echo "Method 3 (timeout + echo) completed"
+            fi
+          fi
+          
+          echo "Final output size: $(cat forge_lint_output.txt | wc -c) characters"
 
       - name: Read Lint Output and Post to Webhook
         if: always()
