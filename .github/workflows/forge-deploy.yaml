@@ -1,0 +1,198 @@
+name: Forge Deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Select environment(s) to deploy to'
+        required: true
+        default: 'dev'
+        type: choice
+        options:
+          - 'dev'
+          - 'test'
+          - 'prod'
+          - 'dev-and-test'
+          - 'all'
+      skip_tests:
+        description: 'Skip running tests before deployment'
+        required: false
+        default: false
+        type: boolean
+      force_deploy:
+        description: 'Force deployment (skip confirmation prompts)'
+        required: false
+        default: false
+        type: boolean
+
+jobs:
+  # Pre-deployment checks
+  pre-checks:
+    runs-on: ubuntu-latest
+    outputs:
+      deploy-dev: ${{ steps.determine-envs.outputs.deploy-dev }}
+      deploy-test: ${{ steps.determine-envs.outputs.deploy-test }}
+      deploy-prod: ${{ steps.determine-envs.outputs.deploy-prod }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run tests
+        if: ${{ !inputs.skip_tests }}
+        run: |
+          echo "Running tests..."
+          # Add your test commands here
+          # npm test
+          echo "✅ Tests passed"
+
+      - name: Determine environments to deploy
+        id: determine-envs
+        run: |
+          case "${{ inputs.environment }}" in
+            "dev")
+              echo "deploy-dev=true" >> $GITHUB_OUTPUT
+              echo "deploy-test=false" >> $GITHUB_OUTPUT
+              echo "deploy-prod=false" >> $GITHUB_OUTPUT
+              ;;
+            "test")
+              echo "deploy-dev=false" >> $GITHUB_OUTPUT
+              echo "deploy-test=true" >> $GITHUB_OUTPUT
+              echo "deploy-prod=false" >> $GITHUB_OUTPUT
+              ;;
+            "prod")
+              echo "deploy-dev=false" >> $GITHUB_OUTPUT
+              echo "deploy-test=false" >> $GITHUB_OUTPUT
+              echo "deploy-prod=true" >> $GITHUB_OUTPUT
+              ;;
+            "dev-and-test")
+              echo "deploy-dev=true" >> $GITHUB_OUTPUT
+              echo "deploy-test=true" >> $GITHUB_OUTPUT
+              echo "deploy-prod=false" >> $GITHUB_OUTPUT
+              ;;
+            "all")
+              echo "deploy-dev=true" >> $GITHUB_OUTPUT
+              echo "deploy-test=true" >> $GITHUB_OUTPUT
+              echo "deploy-prod=true" >> $GITHUB_OUTPUT
+              ;;
+          esac
+
+  # Deploy to Development
+  deploy-dev:
+    needs: pre-checks
+    if: needs.pre-checks.outputs.deploy-dev == 'true'
+    runs-on: ubuntu-latest
+    environment: development
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install Forge CLI
+        run: npm install -g @forge/cli
+
+      - name: Configure Forge CLI
+        env:
+          FORGE_EMAIL: ${{ secrets.FORGE_EMAIL }}
+          FORGE_API_TOKEN: ${{ secrets.FORGE_API_TOKEN }}
+
+      - name: Deploy to Development
+        run: |
+          echo "🚀 Deploying to Development environment..."
+          forge deploy --environment development
+          echo "✅ Development deployment completed"
+
+  # Deploy to Test
+  deploy-test:
+    needs: [pre-checks, deploy-dev]
+    if: needs.pre-checks.outputs.deploy-test == 'true' && (success() || needs.deploy-dev.result == 'skipped')
+    runs-on: ubuntu-latest
+    environment: test
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install Forge CLI
+        run: npm install -g @forge/cli
+
+      - name: Configure Forge CLI
+        env:
+          FORGE_EMAIL: ${{ secrets.FORGE_EMAIL }}
+          FORGE_API_TOKEN: ${{ secrets.FORGE_API_TOKEN }}
+
+      - name: Deploy to Test
+        env:
+          CI: true
+          FORGE_NO_PROMPT: true
+        run: |
+          echo "🚀 Deploying to Test environment..."
+          forge deploy --environment test
+          echo "✅ Test deployment completed"
+
+  # Deploy to Production
+  deploy-production:
+    needs: [pre-checks, deploy-test]
+    if: needs.pre-checks.outputs.deploy-prod == 'true' && (success() || needs.deploy-test.result == 'skipped')
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install Forge CLI
+        run: npm install -g @forge/cli
+
+      - name: Configure Forge CLI
+        env:
+          FORGE_EMAIL: ${{ secrets.FORGE_EMAIL }}
+          FORGE_API_TOKEN: ${{ secrets.FORGE_API_TOKEN }}
+
+      - name: Deploy to Production
+        env:
+          CI: true
+          FORGE_NO_PROMPT: true
+        run: |
+          echo "🚀 Deploying to Production environment..."
+          if [ "${{ inputs.force_deploy }}" = "true" ]; then
+            forge deploy --environment prod
+          else
+            echo "Production deployment requires manual confirmation"
+            forge deploy --environment prod
+          fi
+          echo "✅ Production deployment completed"
+
+  # Post-deployment notifications
+  notify:
+    needs: [deploy-dev, deploy-test, deploy-production]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send deployment notification
+        run: |
+          echo "📋 Deployment Summary:"
+          echo "Environment: ${{ inputs.environment }}"
+          echo "Dev: ${{ needs.deploy-dev.result || 'skipped' }}"
+          echo "Test: ${{ needs.deploy-test.result || 'skipped' }}"
+          echo "Production: ${{ needs.deploy-production.result || 'skipped' }}"
+          
+          # Optional: Send to webhook, Slack, etc.
+          # curl -X POST -H "Content-Type: application/json" \
+          #   -d '{"text":"Deployment completed for ${{ inputs.environment }}"}' \
+          #   ${{ secrets.SLACK_WEBHOOK_URL }}
