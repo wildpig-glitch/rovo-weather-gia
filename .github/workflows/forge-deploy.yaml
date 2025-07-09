@@ -117,7 +117,7 @@ jobs:
     needs: [pre-checks, test]
     if: needs.pre-checks.outputs.deploy-dev == 'true'
     runs-on: ubuntu-latest
-    environment: development
+    #environment: development
     steps:
       - uses: actions/checkout@v4
 
@@ -147,7 +147,7 @@ jobs:
     needs: [pre-checks, test]
     if: needs.pre-checks.outputs.deploy-test == 'true'
     runs-on: ubuntu-latest
-    environment: test
+    #environment: test
     steps:
       - uses: actions/checkout@v4
 
@@ -177,7 +177,7 @@ jobs:
     needs: [pre-checks, test]
     if: needs.pre-checks.outputs.deploy-prod == 'true'
     runs-on: ubuntu-latest
-    environment: production
+    #environment: production
     steps:
       - uses: actions/checkout@v4
 
@@ -212,7 +212,7 @@ jobs:
     needs: [pre-checks, deploy-dev]
     if: needs.pre-checks.outputs.deploy-install-dev == 'true' && (success())
     runs-on: ubuntu-latest
-    environment: dev
+    #environment: dev
     steps:
       - uses: actions/checkout@v4
 
