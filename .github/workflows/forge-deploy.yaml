@@ -35,7 +35,18 @@ jobs:
       - name: Determine environments to deploy
         id: determine-envs
         run: |
-          case "${{ inputs.action }}" in
+          if github.event_name == 'pull_request' then
+            echo "This is a pull request. Setting outputs to deploy and install on dev."
+            echo "test=true" >> $GITHUB_OUTPUT
+            echo "deploy-dev=true" >> $GITHUB_OUTPUT
+            echo "deploy-test=false" >> $GITHUB_OUTPUT
+            echo "deploy-prod=false" >> $GITHUB_OUTPUT
+            echo "deploy-install-dev=true" >> $GITHUB_OUTPUT
+            echo "deploy-install-test=false" >> $GITHUB_OUTPUT
+            echo "deploy-install-prod=false" >> $GITHUB_OUTPUT
+          else
+            echo "This is not a pull request. Setting outputs based on action input."
+            case "${{ inputs.action }}" in
             "test")
               echo "test=true" >> $GITHUB_OUTPUT
               echo "deploy-dev=false" >> $GITHUB_OUTPUT
@@ -100,6 +111,8 @@ jobs:
               echo "deploy-install-prod=true" >> $GITHUB_OUTPUT
               ;;
           esac
+          fi
+          
 
   # Tests
   test:
@@ -212,7 +225,7 @@ jobs:
   # Install to Development
   deploy-install-dev:
     needs: deploy-dev
-    if: (needs.pre-checks.outputs.deploy-install-dev == 'true' ||  github.event_name == 'pull_request') && (success()) 
+    if: needs.pre-checks.outputs.deploy-install-dev == 'true' && (success()) 
     runs-on: ubuntu-latest
     #environment: dev
     steps:
