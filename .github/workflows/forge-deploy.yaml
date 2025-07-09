@@ -234,8 +234,16 @@ jobs:
         run: |
           echo "Installing to dev environment..."
           forge settings set usage-analytics true
-          echo "SITE = " $SITE
-          echo "PRODUCT = " $PRODUCT
+          echo "=== Repository Variables ==="
+          echo "SITE: ${{ vars.SITE }}"
+          echo "PRODUCT: ${{ vars.PRODUCT }}"
+
+          echo "=== Environment Variables ==="
+          echo "SITE from env: $SITE"
+          echo "PRODUCT from env: $PRODUCT"
+          echo "=== All GitHub Context ==="
+          echo "vars context: ${{ toJson(vars) }}"
+          
           if [ -z "$SITE" ] || [ -z "$PRODUCT" ]; then
             echo "SITE and PRODUCT environment variables must be set"
             exit 1
