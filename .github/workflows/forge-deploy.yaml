@@ -17,8 +17,7 @@ on:
           - 'deploy-install-test'
           - 'deploy-install-production'
   pull_request:
-    types: [opened]
-    branches: [main, master]
+    types: [opened, synchronize, reopened]
 
 jobs:
   # Pre-deployment checks
