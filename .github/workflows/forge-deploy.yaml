@@ -209,7 +209,7 @@ jobs:
   
   # Install to Development
   deploy-install-dev:
-    needs: [pre-checks, deploy-dev]
+    needs: deploy-dev
     if: needs.pre-checks.outputs.deploy-install-dev == 'true' && (success())
     runs-on: ubuntu-latest
     #environment: dev
@@ -258,7 +258,7 @@ jobs:
 
   # Install to Test
   deploy-install-test:
-    needs: [pre-checks, deploy-test]
+    needs: deploy-test
     if: needs.pre-checks.outputs.deploy-install-test == 'true' && (success())
     runs-on: ubuntu-latest
     #environment: test
@@ -307,7 +307,7 @@ jobs:
 
   # Install to Production
   deploy-install-production:
-    needs: [pre-checks, deploy-production]
+    needs: deploy-production
     if: needs.pre-checks.outputs.deploy-install-prod == 'true' && (success())
     runs-on: ubuntu-latest
     #environment: production
