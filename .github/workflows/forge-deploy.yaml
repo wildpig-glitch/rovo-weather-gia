@@ -18,30 +18,6 @@ on:
           - 'deploy-install-production'
 
 jobs:
-
-  setup:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '18'
-      - name: Install dependencies
-        run: npm install
-      - name: Install Forge CLI
-        run: npm install -g @forge/cli
-      - name: Upload node_modules
-        uses: actions/upload-artifact@v4
-        with:
-          name: node_modules
-          path: node_modules/
-      - name: Upload Forge CLI
-        uses: actions/upload-artifact@v4
-        with:
-          name: forge-cli
-          path: /usr/local/lib/node_modules/@forge/
-
   # Pre-deployment checks
   pre-checks:
     runs-on: ubuntu-latest
@@ -144,17 +120,17 @@ jobs:
     #environment: development
     steps:
       - uses: actions/checkout@v4
-      # Download the pre-installed dependencies
-      - name: Download node_modules
-        uses: actions/download-artifact@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
         with:
-          name: node_modules
-          path: node_modules/
-      - name: Download Forge CLI
-        uses: actions/download-artifact@v4
-        with:
-          name: forge-cli
-          path: /usr/local/lib/node_modules/@forge/
+          node-version: '22'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Install Forge CLI
+        run: npm install -g @forge/cli
 
       - name: Deploy to Development
         env:
