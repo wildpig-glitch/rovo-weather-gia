@@ -110,7 +110,7 @@ jobs:
               echo "deploy-install-test=false" >> $GITHUB_OUTPUT
               echo "deploy-install-prod=true" >> $GITHUB_OUTPUT
               ;;
-          esac
+            esac
           fi
           
 
