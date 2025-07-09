@@ -234,5 +234,12 @@ jobs:
         run: |
           echo "Installing to dev environment..."
           forge settings set usage-analytics true
+          echo "SITE = " $SITE
+          echo "PRODUCT = " $PRODUCT
+          if [ -z "$SITE" ] || [ -z "$PRODUCT" ]; then
+            echo "SITE and PRODUCT environment variables must be set"
+            exit 1
+          fi
+          echo "Running Forge install for Development environment..."
           forge install --environment development --site $SITE --product $PRODUCT --non-interactive
           echo "Development installation completed"
