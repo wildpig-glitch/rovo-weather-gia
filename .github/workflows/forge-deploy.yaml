@@ -233,6 +233,7 @@ jobs:
           FORGE_API_TOKEN: ${{ secrets.FORGE_API_TOKEN }}
           SITE: ${{ vars.SITE }}
           PRODUCT: ${{ vars.PRODUCT }}
+          TARGET_ENV: development 
         run: |
           echo "Checking environment variables..."
           if [ -z "$SITE" ] || [ -z "$PRODUCT" ]; then
@@ -250,9 +251,15 @@ jobs:
           if echo "$install_output" | grep -q "The app is not installed anywhere"; then
             echo "App is not installed. Running fresh installation..."
             forge install --environment development --site $SITE --product $PRODUCT --non-interactive
+          elif echo "$install_output" | grep -E "│\s+[a-f0-9-]+\s+│\s+$TARGET_ENV\s+│" > /dev/null; then
+            echo "App is already installed in $TARGET_ENV environment. Running upgrade..."
+            forge install --environment $TARGET_ENV --site $SITE --product $PRODUCT --non-interactive --upgrade
+          elif echo "$install_output" | grep -q "Installation ID"; then
+            echo "App is installed in other environments but not in $TARGET_ENV. Running fresh installation..."
+            forge install --environment $TARGET_ENV --site $SITE --product $PRODUCT --non-interactive
           else
-            echo "App is already installed. Running an upgrade..."
-            forge install --environment development --site $SITE --product $PRODUCT --non-interactive --upgrade
+            echo "⚠ Unexpected installation status. Output was:"
+            echo "$install_output"
           fi
           echo "Development installation completed"
 
