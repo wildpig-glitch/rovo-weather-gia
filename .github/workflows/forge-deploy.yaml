@@ -6,7 +6,7 @@ on:
       action:
         description: 'Select action to run'
         required: true
-        default: 'deploy-dev'
+        default: 'deploy-install-dev'
         type: choice
         options:
           - 'test'
@@ -16,6 +16,9 @@ on:
           - 'deploy-install-dev'
           - 'deploy-install-test'
           - 'deploy-install-production'
+  pull_request:
+    types: [opened]
+    branches: [main, master]
 
 jobs:
   # Pre-deployment checks
@@ -210,7 +213,7 @@ jobs:
   # Install to Development
   deploy-install-dev:
     needs: deploy-dev
-    if: needs.pre-checks.outputs.deploy-install-dev == 'true' && (success())
+    if: (needs.pre-checks.outputs.deploy-install-dev == 'true' ||  github.event_name == 'pull_request') && (success()) 
     runs-on: ubuntu-latest
     #environment: dev
     steps:
