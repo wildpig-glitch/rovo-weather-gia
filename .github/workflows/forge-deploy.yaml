@@ -227,7 +227,7 @@ jobs:
       - name: Install Forge CLI
         run: npm install -g @forge/cli
 
-      - name: Deploy to Production
+      - name: Install to Development
         env:
           FORGE_EMAIL: ${{ secrets.FORGE_EMAIL }}
           FORGE_API_TOKEN: ${{ secrets.FORGE_API_TOKEN }}
@@ -255,3 +255,101 @@ jobs:
             forge install --environment development --site $SITE --product $PRODUCT --non-interactive --upgrade
           fi
           echo "Development installation completed"
+
+  # Install to Test
+  deploy-install-test:
+    needs: [pre-checks, deploy-test]
+    if: needs.pre-checks.outputs.deploy-install-test == 'true' && (success())
+    runs-on: ubuntu-latest
+    #environment: test
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Install Forge CLI
+        run: npm install -g @forge/cli
+
+      - name: Install to Test
+        env:
+          FORGE_EMAIL: ${{ secrets.FORGE_EMAIL }}
+          FORGE_API_TOKEN: ${{ secrets.FORGE_API_TOKEN }}
+          SITE: ${{ vars.SITE }}
+          PRODUCT: ${{ vars.PRODUCT }}
+        run: |
+          echo "Checking environment variables..."
+          if [ -z "$SITE" ] || [ -z "$PRODUCT" ]; then
+            echo "SITE and PRODUCT environment variables must be set"
+            exit 1
+          fi
+
+          forge settings set usage-analytics true
+          install_output=$(forge install list 2>&1)
+          echo "Installation status:"
+          echo "$install_output"
+          echo "---"
+
+          # Check if app is not installed
+          if echo "$install_output" | grep -q "The app is not installed anywhere"; then
+            echo "App is not installed. Running fresh installation..."
+            forge install --environment test --site $SITE --product $PRODUCT --non-interactive
+          else
+            echo "App is already installed. Running an upgrade..."
+            forge install --environment test --site $SITE --product $PRODUCT --non-interactive --upgrade
+          fi
+          echo "Test installation completed"
+
+  # Install to Production
+  deploy-install-production:
+    needs: [pre-checks, deploy-production]
+    if: needs.pre-checks.outputs.deploy-install-prod == 'true' && (success())
+    runs-on: ubuntu-latest
+    #environment: production
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Install Forge CLI
+        run: npm install -g @forge/cli
+
+      - name: Install to Production
+        env:
+          FORGE_EMAIL: ${{ secrets.FORGE_EMAIL }}
+          FORGE_API_TOKEN: ${{ secrets.FORGE_API_TOKEN }}
+          SITE: ${{ vars.SITE }}
+          PRODUCT: ${{ vars.PRODUCT }}
+        run: |
+          echo "Checking environment variables..."
+          if [ -z "$SITE" ] || [ -z "$PRODUCT" ]; then
+            echo "SITE and PRODUCT environment variables must be set"
+            exit 1
+          fi
+
+          forge settings set usage-analytics true
+          install_output=$(forge install list 2>&1)
+          echo "Installation status:"
+          echo "$install_output"
+          echo "---"
+
+          # Check if app is not installed
+          if echo "$install_output" | grep -q "The app is not installed anywhere"; then
+            echo "App is not installed. Running fresh installation..."
+            forge install --environment production --site $SITE --product $PRODUCT --non-interactive
+          else
+            echo "App is already installed. Running an upgrade..."
+            forge install --environment production --site $SITE --product $PRODUCT --non-interactive --upgrade
+          fi
+          echo "Production installation completed"
