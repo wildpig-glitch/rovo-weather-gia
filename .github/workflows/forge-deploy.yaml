@@ -108,6 +108,7 @@ jobs:
           FORGE_API_TOKEN: ${{ secrets.FORGE_API_TOKEN }}
         run: |
           echo "🚀 Deploying to Development environment..."
+          forge settings set usage-analytics true
           forge deploy --environment development
           echo "✅ Development deployment completed"
 
@@ -134,6 +135,7 @@ jobs:
           FORGE_API_TOKEN: ${{ secrets.FORGE_API_TOKEN }}
         run: |
           echo "🚀 Deploying to Test environment..."
+          forge settings set usage-analytics true
           forge deploy --environment test
           echo "✅ Test deployment completed"
 
@@ -160,6 +162,7 @@ jobs:
           FORGE_API_TOKEN: ${{ secrets.FORGE_API_TOKEN }}
         run: |
           echo "🚀 Deploying to Production environment..."
+          forge settings set usage-analytics true
           if [ "${{ inputs.force_deploy }}" = "true" ]; then
             forge deploy --environment prod
           else
