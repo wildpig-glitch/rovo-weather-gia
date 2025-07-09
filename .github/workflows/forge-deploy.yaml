@@ -234,7 +234,12 @@ jobs:
           SITE: ${{ vars.SITE }}
           PRODUCT: ${{ vars.PRODUCT }}
         run: |
-          echo "Installing to dev environment..."
+          echo "Checking environment variables..."
+          if [ -z "$SITE" ] || [ -z "$PRODUCT" ]; then
+            echo "SITE and PRODUCT environment variables must be set"
+            exit 1
+          fi
+
           forge settings set usage-analytics true
           install_output=$(forge install list 2>&1)
           echo "Installation status:"
@@ -249,11 +254,4 @@ jobs:
             echo "App is already installed. Running an upgrade..."
             forge install --environment development --site $SITE --product $PRODUCT --non-interactive --upgrade
           fi
-
-          if [ -z "$SITE" ] || [ -z "$PRODUCT" ]; then
-            echo "SITE and PRODUCT environment variables must be set"
-            exit 1
-          fi
-          echo "Running Forge install for Development environment..."
-          forge install --environment development --site $SITE --product $PRODUCT --non-interactive
           echo "Development installation completed"
