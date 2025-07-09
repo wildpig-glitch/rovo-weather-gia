@@ -52,7 +52,7 @@ jobs:
       - name: Determine environments to deploy
         id: determine-envs
         run: |
-          case "${{ inputs.environment }}" in
+          case "${{ inputs.action }}" in
             "test")
               echo "test=true" >> $GITHUB_OUTPUT
               echo "deploy-dev=false" >> $GITHUB_OUTPUT
