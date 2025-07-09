@@ -3,7 +3,7 @@ name: Forge Deploy
 on:
   workflow_dispatch:
     inputs:
-      environment:
+      action:
         description: 'Select action to run'
         required: true
         default: 'deploy-dev'
@@ -28,6 +28,7 @@ jobs:
   pre-checks:
     runs-on: ubuntu-latest
     outputs:
+      test: ${{ steps.determine-envs.outputs.test }}
       deploy-dev: ${{ steps.determine-envs.outputs.deploy-dev }}
       deploy-test: ${{ steps.determine-envs.outputs.deploy-test }}
       deploy-prod: ${{ steps.determine-envs.outputs.deploy-prod }}
@@ -52,7 +53,17 @@ jobs:
         id: determine-envs
         run: |
           case "${{ inputs.environment }}" in
+            "test")
+              echo "test=true" >> $GITHUB_OUTPUT
+              echo "deploy-dev=false" >> $GITHUB_OUTPUT
+              echo "deploy-test=false" >> $GITHUB_OUTPUT
+              echo "deploy-prod=false" >> $GITHUB_OUTPUT
+              echo "install-dev=false" >> $GITHUB_OUTPUT
+              echo "install-test=false" >> $GITHUB_OUTPUT
+              echo "install-prod=false" >> $GITHUB_OUTPUT
+              ;;
             "deploy-dev")
+              echo "test=true" >> $GITHUB_OUTPUT
               echo "deploy-dev=true" >> $GITHUB_OUTPUT
               echo "deploy-test=false" >> $GITHUB_OUTPUT
               echo "deploy-prod=false" >> $GITHUB_OUTPUT
@@ -61,6 +72,7 @@ jobs:
               echo "install-prod=false" >> $GITHUB_OUTPUT
               ;;
             "deploy-test")
+              echo "test=true" >> $GITHUB_OUTPUT
               echo "deploy-dev=false" >> $GITHUB_OUTPUT
               echo "deploy-test=true" >> $GITHUB_OUTPUT
               echo "deploy-prod=false" >> $GITHUB_OUTPUT
@@ -69,6 +81,7 @@ jobs:
               echo "install-prod=false" >> $GITHUB_OUTPUT
               ;;
             "deploy-production")
+              echo "test=true" >> $GITHUB_OUTPUT
               echo "deploy-dev=false" >> $GITHUB_OUTPUT
               echo "deploy-test=false" >> $GITHUB_OUTPUT
               echo "deploy-prod=true" >> $GITHUB_OUTPUT
@@ -77,6 +90,7 @@ jobs:
               echo "install-prod=false" >> $GITHUB_OUTPUT
               ;;
             "install-dev")
+              echo "test=true" >> $GITHUB_OUTPUT
               echo "deploy-dev=true" >> $GITHUB_OUTPUT
               echo "deploy-test=false" >> $GITHUB_OUTPUT
               echo "deploy-prod=false" >> $GITHUB_OUTPUT
@@ -85,6 +99,7 @@ jobs:
               echo "install-prod=false" >> $GITHUB_OUTPUT
               ;;
             "install-test")
+              echo "test=true" >> $GITHUB_OUTPUT
               echo "deploy-dev=false" >> $GITHUB_OUTPUT
               echo "deploy-test=true" >> $GITHUB_OUTPUT
               echo "deploy-prod=false" >> $GITHUB_OUTPUT
@@ -93,6 +108,7 @@ jobs:
               echo "install-prod=false" >> $GITHUB_OUTPUT
               ;;
             "install-production")
+              echo "test=true" >> $GITHUB_OUTPUT
               echo "deploy-dev=false" >> $GITHUB_OUTPUT
               echo "deploy-test=false" >> $GITHUB_OUTPUT
               echo "deploy-prod=true" >> $GITHUB_OUTPUT
@@ -101,6 +117,7 @@ jobs:
               echo "install-prod=true" >> $GITHUB_OUTPUT
               ;;              
             "all")
+            echo "test=true" >> $GITHUB_OUTPUT
               echo "deploy-dev=true" >> $GITHUB_OUTPUT
               echo "deploy-test=true" >> $GITHUB_OUTPUT
               echo "deploy-prod=true" >> $GITHUB_OUTPUT
@@ -119,19 +136,14 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Run tests
-        env:
-          FORGE_EMAIL: ${{ secrets.FORGE_EMAIL }}
-          FORGE_API_TOKEN: ${{ secrets.FORGE_API_TOKEN }}
         run: |
           echo "Running tests..."
           # Add your test commands here
-          forge settings set usage-analytics true
-          forge lint
           echo "Tests passed"
   
   # Deploy to Development
   deploy-dev:
-    needs: pre-checks
+    needs: [pre-checks, test]
     if: needs.pre-checks.outputs.deploy-dev == 'true'
     runs-on: ubuntu-latest
     environment: development
@@ -141,7 +153,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '22'
 
       - name: Install dependencies
         run: npm install
@@ -185,6 +197,7 @@ jobs:
           FORGE_API_TOKEN: ${{ secrets.FORGE_API_TOKEN }}
         run: |
           echo "Deploying to Test environment..."
+          forge settings set usage-analytics true
           forge deploy --environment test
           echo "Test deployment completed"
 
@@ -214,6 +227,7 @@ jobs:
           FORGE_API_TOKEN: ${{ secrets.FORGE_API_TOKEN }}
         run: |
           echo "Deploying to Production environment..."
+          forge settings set usage-analytics true
           if [ "${{ inputs.force_deploy }}" = "true" ]; then
             forge deploy --environment production
           else
@@ -221,6 +235,36 @@ jobs:
             forge deploy --environment production
           fi
           echo "Production deployment completed"
+  
+  # Install to Development
+  install-dev:
+    needs: [pre-checks, deploy-prod]
+    if: needs.pre-checks.outputs.install-dev == 'true' && (success() || needs.deploy-prod.result == 'skipped')
+    runs-on: ubuntu-latest
+    environment: dev
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Install Forge CLI
+        run: npm install -g @forge/cli
+
+      - name: Deploy to Production
+        env:
+          FORGE_EMAIL: ${{ secrets.FORGE_EMAIL }}
+          FORGE_API_TOKEN: ${{ secrets.FORGE_API_TOKEN }}
+        run: |
+          echo "Installing to dev environment..."
+          forge settings set usage-analytics true
+          forge install --environment development --site $SITE --product $PRODUCT --non-interactive
+          echo "Development installation completed"
 
   # Post-deployment notifications
   notify:
