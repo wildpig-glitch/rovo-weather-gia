@@ -236,15 +236,19 @@ jobs:
         run: |
           echo "Installing to dev environment..."
           forge settings set usage-analytics true
-          echo "=== Repository Variables ==="
-          echo "SITE: ${{ vars.SITE }}"
-          echo "PRODUCT: ${{ vars.PRODUCT }}"
+          install_output=$(forge install list 2>&1)
+          echo "Installation status:"
+          echo "$install_output"
+          echo "---"
 
-          echo "=== Environment Variables ==="
-          echo "SITE from env: $SITE"
-          echo "PRODUCT from env: $PRODUCT"
-          echo "=== All GitHub Context ==="
-          echo "vars context: ${{ toJson(vars) }}"
+          # Check if app is not installed
+          if echo "$install_output" | grep -q "The app is not installed anywhere"; then
+            echo "App is not installed. Running fresh installation..."
+            forge install --environment development --site $SITE --product $PRODUCT --non-interactive
+          else
+            echo "App is already installed. Running an upgrade..."
+            forge install --environment development --site $SITE --product $PRODUCT --non-interactive --upgrade
+          fi
 
           if [ -z "$SITE" ] || [ -z "$PRODUCT" ]; then
             echo "SITE and PRODUCT environment variables must be set"
