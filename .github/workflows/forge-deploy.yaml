@@ -208,9 +208,9 @@ jobs:
           echo "Production deployment completed"
   
   # Install to Development
-  install-dev:
+  deploy-install-dev:
     needs: [pre-checks, deploy-dev]
-    if: needs.pre-checks.outputs.install-dev == 'true' && (success())
+    if: needs.pre-checks.outputs.deploy-install-dev == 'true' && (success())
     runs-on: ubuntu-latest
     environment: dev
     steps:
