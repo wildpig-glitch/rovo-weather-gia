@@ -231,6 +231,8 @@ jobs:
         env:
           FORGE_EMAIL: ${{ secrets.FORGE_EMAIL }}
           FORGE_API_TOKEN: ${{ secrets.FORGE_API_TOKEN }}
+          SITE: ${{ vars.SITE }}
+          PRODUCT: ${{ vars.PRODUCT }}
         run: |
           echo "Installing to dev environment..."
           forge settings set usage-analytics true
@@ -243,7 +245,7 @@ jobs:
           echo "PRODUCT from env: $PRODUCT"
           echo "=== All GitHub Context ==="
           echo "vars context: ${{ toJson(vars) }}"
-          
+
           if [ -z "$SITE" ] || [ -z "$PRODUCT" ]; then
             echo "SITE and PRODUCT environment variables must be set"
             exit 1
