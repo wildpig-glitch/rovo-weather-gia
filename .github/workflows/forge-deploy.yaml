@@ -1,8 +1,6 @@
 name: Forge Deploy
 
 on:
-  pull_request:
-    types: [opened, synchronize, reopened]
   workflow_dispatch:
     inputs:
       environment:
@@ -13,7 +11,7 @@ on:
         options:
           - 'dev'
           - 'test'
-          - 'prod'
+          - 'production'
           - 'dev-and-test'
           - 'all'
       skip_tests:
@@ -52,7 +50,7 @@ jobs:
           echo "Running tests..."
           # Add your test commands here
           # npm test
-          echo "✅ Tests passed"
+          echo "Tests passed"
 
       - name: Determine environments to deploy
         id: determine-envs
@@ -68,7 +66,7 @@ jobs:
               echo "deploy-test=true" >> $GITHUB_OUTPUT
               echo "deploy-prod=false" >> $GITHUB_OUTPUT
               ;;
-            "prod")
+            "production")
               echo "deploy-dev=false" >> $GITHUB_OUTPUT
               echo "deploy-test=false" >> $GITHUB_OUTPUT
               echo "deploy-prod=true" >> $GITHUB_OUTPUT
@@ -99,6 +97,9 @@ jobs:
         with:
           node-version: '18'
 
+      - name: Install dependencies
+        run: npm install
+
       - name: Install Forge CLI
         run: npm install -g @forge/cli
 
@@ -107,10 +108,10 @@ jobs:
           FORGE_EMAIL: ${{ secrets.FORGE_EMAIL }}
           FORGE_API_TOKEN: ${{ secrets.FORGE_API_TOKEN }}
         run: |
-          echo "🚀 Deploying to Development environment..."
+          echo "Deploying to Development environment..."
           forge settings set usage-analytics true
           forge deploy --environment development
-          echo "✅ Development deployment completed"
+          echo "Development deployment completed"
 
   # Deploy to Test
   deploy-test:
@@ -126,6 +127,9 @@ jobs:
         with:
           node-version: '18'
 
+      - name: Install dependencies
+        run: npm install
+
       - name: Install Forge CLI
         run: npm install -g @forge/cli
 
@@ -134,10 +138,10 @@ jobs:
           FORGE_EMAIL: ${{ secrets.FORGE_EMAIL }}
           FORGE_API_TOKEN: ${{ secrets.FORGE_API_TOKEN }}
         run: |
-          echo "🚀 Deploying to Test environment..."
+          echo "Deploying to Test environment..."
           forge settings set usage-analytics true
           forge deploy --environment test
-          echo "✅ Test deployment completed"
+          echo "Test deployment completed"
 
   # Deploy to Production
   deploy-production:
@@ -153,6 +157,9 @@ jobs:
         with:
           node-version: '18'
 
+      - name: Install dependencies
+        run: npm install
+
       - name: Install Forge CLI
         run: npm install -g @forge/cli
 
@@ -161,15 +168,15 @@ jobs:
           FORGE_EMAIL: ${{ secrets.FORGE_EMAIL }}
           FORGE_API_TOKEN: ${{ secrets.FORGE_API_TOKEN }}
         run: |
-          echo "🚀 Deploying to Production environment..."
+          echo "Deploying to Production environment..."
           forge settings set usage-analytics true
           if [ "${{ inputs.force_deploy }}" = "true" ]; then
-            forge deploy --environment prod
+            forge deploy --environment production
           else
             echo "Production deployment requires manual confirmation"
-            forge deploy --environment prod
+            forge deploy --environment production
           fi
-          echo "✅ Production deployment completed"
+          echo "Production deployment completed"
 
   # Post-deployment notifications
   notify:
@@ -179,7 +186,7 @@ jobs:
     steps:
       - name: Send deployment notification
         run: |
-          echo "📋 Deployment Summary:"
+          echo "Deployment Summary:"
           echo "Environment: ${{ inputs.environment }}"
           echo "Dev: ${{ needs.deploy-dev.result || 'skipped' }}"
           echo "Test: ${{ needs.deploy-test.result || 'skipped' }}"
