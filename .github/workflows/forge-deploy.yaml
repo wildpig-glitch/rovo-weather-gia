@@ -16,11 +16,6 @@ on:
           - 'deploy-install-dev'
           - 'deploy-install-test'
           - 'deploy-install-production'
-      skip_tests:
-        description: 'Skip running tests before deployment'
-        required: false
-        default: false
-        type: boolean
 
 jobs:
   # Pre-deployment checks
@@ -107,7 +102,6 @@ jobs:
   # Tests
   test:
     needs: pre-checks
-    if: ${{ !inputs.skip_tests }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -150,7 +144,7 @@ jobs:
 
   # Deploy to Test
   deploy-test:
-    needs: [pre-checks, tests]
+    needs: [pre-checks, test]
     if: needs.pre-checks.outputs.deploy-test == 'true'
     runs-on: ubuntu-latest
     environment: test
@@ -180,7 +174,7 @@ jobs:
 
   # Deploy to Production
   deploy-production:
-    needs: [pre-checks, tests]
+    needs: [pre-checks, test]
     if: needs.pre-checks.outputs.deploy-prod == 'true'
     runs-on: ubuntu-latest
     environment: production
