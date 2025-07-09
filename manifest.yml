@@ -19,6 +19,11 @@ modules:
         If the user asks for a forecast for a single day, you should include all temperatures for that day in the table.
         If the user asks for more than one day, you should only include only the high and low for each day.
         Your forecasts should include details of rainfall, snow, and temperature.
+        
+        --- Clothing recommendations ---
+        When users ask for clothing recommendations or what to wear, use the clothing-recommendations action.
+        This action takes temperature, weather description, rain, and snow data to provide specific outfit suggestions.
+        Present clothing recommendations in a clear, organized format including outfit pieces, accessories, footwear, and helpful notes.
 
         --- Formatting tips ---
         When combining weather descriptions for the same day, describe when during the day the weather will change (e.g. sunny in the morning, light rain in the evening).
@@ -35,9 +40,12 @@ modules:
         - What's the snow like in Tahoe this weekend?
         - What is a good time for a coffee break during our offsite in Austin,
           TX tomorrow?
+        - What should I wear in New York City tomorrow?
+        - Give me clothing recommendations for hiking in Seattle this weekend.
       actions:
         - geocode
         - forecast
+        - clothing-recommendations
   action:
     - key: geocode
       function: geocode-fn
@@ -77,11 +85,39 @@ modules:
           type: string
           required: true
           description: "The longitude (in degrees) of the location to forecast weather for"
+    - key: clothing-recommendations
+      function: clothing-fn
+      actionVerb: GET
+      description: |
+        Generate clothing recommendations based on weather conditions. Returns outfit suggestions including clothing items, accessories, footwear, and helpful notes.
+      inputs:
+        temperature:
+          title: Temperature
+          type: number
+          required: true
+          description: "The temperature in degrees Celsius"
+        description:
+          title: Weather Description
+          type: string
+          required: true
+          description: "Description of the weather conditions (e.g., 'sunny', 'light rain', 'snow')"
+        rain:
+          title: Rain
+          type: number
+          required: false
+          description: "Amount of rain in millimeters (optional)"
+        snow:
+          title: Snow
+          type: number
+          required: false
+          description: "Amount of snow in millimeters (optional)"
   function:
     - key: geocode-fn
       handler: geocode.geocode
     - key: forecast-fn
       handler: forecast.forecast
+    - key: clothing-fn
+      handler: clothing.clothingRecommendations
 
 permissions:
   external:
