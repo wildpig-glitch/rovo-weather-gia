@@ -13,10 +13,9 @@ on:
           - 'deploy-dev'
           - 'deploy-test'
           - 'deploy-production'
-          - 'install-dev'
-          - 'install-test'
-          - 'install-production'
-          - 'all'
+          - 'deploy-install-dev'
+          - 'deploy-install-test'
+          - 'deploy-install-production'
       skip_tests:
         description: 'Skip running tests before deployment'
         required: false
@@ -32,23 +31,10 @@ jobs:
       deploy-dev: ${{ steps.determine-envs.outputs.deploy-dev }}
       deploy-test: ${{ steps.determine-envs.outputs.deploy-test }}
       deploy-prod: ${{ steps.determine-envs.outputs.deploy-prod }}
-      install-dev: ${{ steps.determine-envs.outputs.install-dev }}
-      install-test: ${{ steps.determine-envs.outputs.install-test }}
-      install-prod: ${{ steps.determine-envs.outputs.install-prod }}
+      deploy-install-dev: ${{ steps.determine-envs.outputs.deploy-install-dev }}
+      deploy-install-test: ${{ steps.determine-envs.outputs.deploy-install-test }}
+      deploy-install-prod: ${{ steps.determine-envs.outputs.deploy-install-prod }}
     steps:
-      - uses: actions/checkout@v4
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-
-      - name: Install dependencies
-        run: npm install
-        
-      - name: Install Forge CLI
-        run: npm install -g @forge/cli
-
       - name: Determine environments to deploy
         id: determine-envs
         run: |
@@ -58,72 +44,63 @@ jobs:
               echo "deploy-dev=false" >> $GITHUB_OUTPUT
               echo "deploy-test=false" >> $GITHUB_OUTPUT
               echo "deploy-prod=false" >> $GITHUB_OUTPUT
-              echo "install-dev=false" >> $GITHUB_OUTPUT
-              echo "install-test=false" >> $GITHUB_OUTPUT
-              echo "install-prod=false" >> $GITHUB_OUTPUT
+              echo "deploy-install-dev=false" >> $GITHUB_OUTPUT
+              echo "deploy-install-test=false" >> $GITHUB_OUTPUT
+              echo "deploy-install-prod=false" >> $GITHUB_OUTPUT
               ;;
             "deploy-dev")
               echo "test=true" >> $GITHUB_OUTPUT
               echo "deploy-dev=true" >> $GITHUB_OUTPUT
               echo "deploy-test=false" >> $GITHUB_OUTPUT
               echo "deploy-prod=false" >> $GITHUB_OUTPUT
-              echo "install-dev=false" >> $GITHUB_OUTPUT
-              echo "install-test=false" >> $GITHUB_OUTPUT
-              echo "install-prod=false" >> $GITHUB_OUTPUT
+              echo "deploy-install-dev=false" >> $GITHUB_OUTPUT
+              echo "deploy-install-test=false" >> $GITHUB_OUTPUT
+              echo "deploy-install-prod=false" >> $GITHUB_OUTPUT
               ;;
             "deploy-test")
               echo "test=true" >> $GITHUB_OUTPUT
               echo "deploy-dev=false" >> $GITHUB_OUTPUT
               echo "deploy-test=true" >> $GITHUB_OUTPUT
               echo "deploy-prod=false" >> $GITHUB_OUTPUT
-              echo "install-dev=false" >> $GITHUB_OUTPUT
-              echo "install-test=false" >> $GITHUB_OUTPUT
-              echo "install-prod=false" >> $GITHUB_OUTPUT
+              echo "deploy-install-dev=false" >> $GITHUB_OUTPUT
+              echo "deploy-install-test=false" >> $GITHUB_OUTPUT
+              echo "deploy-install-prod=false" >> $GITHUB_OUTPUT
               ;;
             "deploy-production")
               echo "test=true" >> $GITHUB_OUTPUT
               echo "deploy-dev=false" >> $GITHUB_OUTPUT
               echo "deploy-test=false" >> $GITHUB_OUTPUT
               echo "deploy-prod=true" >> $GITHUB_OUTPUT
-              echo "install-dev=false" >> $GITHUB_OUTPUT
-              echo "install-test=false" >> $GITHUB_OUTPUT
-              echo "install-prod=false" >> $GITHUB_OUTPUT
+              echo "deploy-install-dev=false" >> $GITHUB_OUTPUT
+              echo "deploy-install-test=false" >> $GITHUB_OUTPUT
+              echo "deploy-install-prod=false" >> $GITHUB_OUTPUT
               ;;
-            "install-dev")
+            "deploy-install-dev")
               echo "test=true" >> $GITHUB_OUTPUT
               echo "deploy-dev=true" >> $GITHUB_OUTPUT
               echo "deploy-test=false" >> $GITHUB_OUTPUT
               echo "deploy-prod=false" >> $GITHUB_OUTPUT
-              echo "install-dev=true" >> $GITHUB_OUTPUT
-              echo "install-test=false" >> $GITHUB_OUTPUT
-              echo "install-prod=false" >> $GITHUB_OUTPUT
+              echo "deploy-install-dev=true" >> $GITHUB_OUTPUT
+              echo "deploy-install-test=false" >> $GITHUB_OUTPUT
+              echo "deploy-install-prod=false" >> $GITHUB_OUTPUT
               ;;
-            "install-test")
+            "deploy-install-test")
               echo "test=true" >> $GITHUB_OUTPUT
               echo "deploy-dev=false" >> $GITHUB_OUTPUT
               echo "deploy-test=true" >> $GITHUB_OUTPUT
               echo "deploy-prod=false" >> $GITHUB_OUTPUT
-              echo "install-dev=false" >> $GITHUB_OUTPUT
-              echo "install-test=true" >> $GITHUB_OUTPUT
-              echo "install-prod=false" >> $GITHUB_OUTPUT
+              echo "deploy-install-dev=false" >> $GITHUB_OUTPUT
+              echo "deploy-install-test=true" >> $GITHUB_OUTPUT
+              echo "deploy-install-prod=false" >> $GITHUB_OUTPUT
               ;;
-            "install-production")
+            "deploy-install-production")
               echo "test=true" >> $GITHUB_OUTPUT
               echo "deploy-dev=false" >> $GITHUB_OUTPUT
               echo "deploy-test=false" >> $GITHUB_OUTPUT
               echo "deploy-prod=true" >> $GITHUB_OUTPUT
-              echo "install-dev=false" >> $GITHUB_OUTPUT
-              echo "install-test=false" >> $GITHUB_OUTPUT
-              echo "install-prod=true" >> $GITHUB_OUTPUT
-              ;;              
-            "all")
-            echo "test=true" >> $GITHUB_OUTPUT
-              echo "deploy-dev=true" >> $GITHUB_OUTPUT
-              echo "deploy-test=true" >> $GITHUB_OUTPUT
-              echo "deploy-prod=true" >> $GITHUB_OUTPUT
-              echo "install-dev=true" >> $GITHUB_OUTPUT
-              echo "install-test=true" >> $GITHUB_OUTPUT
-              echo "install-prod=true" >> $GITHUB_OUTPUT
+              echo "deploy-install-dev=false" >> $GITHUB_OUTPUT
+              echo "deploy-install-test=false" >> $GITHUB_OUTPUT
+              echo "deploy-install-prod=true" >> $GITHUB_OUTPUT
               ;;
           esac
 
@@ -173,8 +150,8 @@ jobs:
 
   # Deploy to Test
   deploy-test:
-    needs: [pre-checks, deploy-dev]
-    if: needs.pre-checks.outputs.deploy-test == 'true' && (success() || needs.deploy-dev.result == 'skipped')
+    needs: [pre-checks, tests]
+    if: needs.pre-checks.outputs.deploy-test == 'true'
     runs-on: ubuntu-latest
     environment: test
     steps:
@@ -203,8 +180,8 @@ jobs:
 
   # Deploy to Production
   deploy-production:
-    needs: [pre-checks, deploy-test]
-    if: needs.pre-checks.outputs.deploy-prod == 'true' && (success() || needs.deploy-test.result == 'skipped')
+    needs: [pre-checks, tests]
+    if: needs.pre-checks.outputs.deploy-prod == 'true'
     runs-on: ubuntu-latest
     environment: production
     steps:
@@ -238,8 +215,8 @@ jobs:
   
   # Install to Development
   install-dev:
-    needs: [pre-checks, deploy-production]
-    if: needs.pre-checks.outputs.install-dev == 'true' && (success() || needs.deploy-prod.result == 'skipped')
+    needs: [pre-checks, deploy-dev]
+    if: needs.pre-checks.outputs.install-dev == 'true' && (success())
     runs-on: ubuntu-latest
     environment: dev
     steps:
@@ -265,22 +242,3 @@ jobs:
           forge settings set usage-analytics true
           forge install --environment development --site $SITE --product $PRODUCT --non-interactive
           echo "Development installation completed"
-
-  # Post-deployment notifications
-  notify:
-    needs: [deploy-dev, deploy-test, deploy-production]
-    if: always()
-    runs-on: ubuntu-latest
-    steps:
-      - name: Send deployment notification
-        run: |
-          echo "Deployment Summary:"
-          echo "Environment: ${{ inputs.environment }}"
-          echo "Dev: ${{ needs.deploy-dev.result || 'skipped' }}"
-          echo "Test: ${{ needs.deploy-test.result || 'skipped' }}"
-          echo "Production: ${{ needs.deploy-production.result || 'skipped' }}"
-          
-          # Optional: Send to webhook, Slack, etc.
-          # curl -X POST -H "Content-Type: application/json" \
-          #   -d '{"text":"Deployment completed for ${{ inputs.environment }}"}' \
-          #   ${{ secrets.SLACK_WEBHOOK_URL }}
