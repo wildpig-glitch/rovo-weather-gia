@@ -280,6 +280,29 @@ jobs:
             echo "$install_output"
           fi
           echo "Development installation completed"
+      - name: Read Lint Output and Post to Webhook
+        if: always()
+        run: |
+          output=$(cat forge_lint_output.txt)
+          STATUS="${{ job.status }}"
+          BRANCH="${{ github.head_ref }}"
+          WEBHOOK_URL="https://webhook.site/5a666d75-93ee-4297-bc4c-b85c7d54976f"
+          echo "DEBUG: Captured output size: $(echo "$output" | wc -c) characters"
+          echo "DEBUG: Branch: $BRANCH"
+          echo "DEBUG: Status: $STATUS"
+          payload=$(jq -n \
+            --arg branch "$BRANCH" \
+            --arg status "$STATUS" \
+            --arg output "$output" \
+            '{branch: $branch, status: $status, output: $output}')
+          echo "DEBUG: Payload size: $(echo "$payload" | wc -c) characters"
+          echo "DEBUG: JSON validation: $(echo "$payload" | jq . >/dev/null 2>&1 && echo "Valid" || echo "Invalid")"
+          response=$(curl -s -w "HTTP_CODE:%{http_code}" \
+            -X POST \
+            -H "Content-Type: application/json" \
+            -d "$payload" \
+            "$WEBHOOK_URL")
+          echo "Webhook response: $response"
 
   # Install to Test
   deploy-install-test:
