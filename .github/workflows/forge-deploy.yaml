@@ -3,6 +3,7 @@ name: Forge Deploy
 on:
   push:
     branches: [ main, master, develop ]
+  # Trigger on workflow dispatch with action input
   workflow_dispatch:
     inputs:
       action:
