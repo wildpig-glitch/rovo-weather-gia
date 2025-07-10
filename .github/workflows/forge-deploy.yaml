@@ -38,8 +38,8 @@ jobs:
       - name: Determine environments to deploy
         id: determine-envs
         run: |
-          if [ "${{ github.event_name }}" = "pull_request" ]; then
-            echo "This is a pull request. Setting outputs to deploy and install on dev."
+          if [ "${{ github.event_name }}" = "pull_request" ] || [ "${{ github.event_name }}" = "push" ]; then
+            echo "This is a pull request or push event. Setting outputs to deploy and install on dev."
             echo "test=true" >> $GITHUB_OUTPUT
             echo "deploy-dev=true" >> $GITHUB_OUTPUT
             echo "deploy-test=false" >> $GITHUB_OUTPUT
