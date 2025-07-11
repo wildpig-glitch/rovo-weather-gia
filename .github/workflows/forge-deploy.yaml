@@ -157,8 +157,31 @@ jobs:
         run: |
           echo "Deploying to Development environment..."
           forge settings set usage-analytics true
-          forge deploy --environment development
+          forge deploy --environment development > forge_output.txt 2>&1
           echo "Development deployment completed"
+      - name: Post to Webhook
+        if: always()
+        run: |
+          output=$(cat forge_output.txt)
+          STATUS="${{ job.status }}"
+          BRANCH="${{ github.head_ref }}"
+          WEBHOOK_URL="https://webhook.site/5a666d75-93ee-4297-bc4c-b85c7d54976f"
+          echo "DEBUG: Captured output size: $(echo "$output" | wc -c) characters"
+          echo "DEBUG: Branch: $BRANCH"
+          echo "DEBUG: Status: $STATUS"
+          payload=$(jq -n \
+            --arg branch "$BRANCH" \
+            --arg status "$STATUS" \
+            --arg output "$output" \
+            '{branch: $branch, status: $status, output: $output}')
+          echo "DEBUG: Payload size: $(echo "$payload" | wc -c) characters"
+          echo "DEBUG: JSON validation: $(echo "$payload" | jq . >/dev/null 2>&1 && echo "Valid" || echo "Invalid")"
+          response=$(curl -s -w "HTTP_CODE:%{http_code}" \
+            -X POST \
+            -H "Content-Type: application/json" \
+            -d "$payload" \
+            "$WEBHOOK_URL")
+          echo "Webhook response: $response"
 
   # Deploy to Test
   deploy-test:
@@ -260,30 +283,30 @@ jobs:
           fi
 
           forge settings set usage-analytics true
-          install_output=$(forge install list 2>&1)
+          install_check=$(forge install list 2>&1)
           echo "Installation status:"
-          echo "$install_output"
+          echo "$install_check"
           echo "---"
 
           # Check if app is not installed
-          if echo "$install_output" | grep -q "The app is not installed anywhere"; then
+          if echo "$install_check" | grep -q "The app is not installed anywhere"; then
             echo "App is not installed. Running fresh installation..."
-            forge install --environment development --site $SITE --product $PRODUCT --non-interactive
-          elif echo "$install_output" | grep -E "│\s+[a-f0-9-]+\s+│\s+$TARGET_ENV\s+│" > /dev/null; then
+            forge install --environment development --site $SITE --product $PRODUCT --non-interactive > forge_output.txt 2>&1
+          elif echo "$install_check" | grep -E "│\s+[a-f0-9-]+\s+│\s+$TARGET_ENV\s+│" > /dev/null; then
             echo "App is already installed in $TARGET_ENV environment. Running upgrade..."
-            forge install --environment $TARGET_ENV --site $SITE --product $PRODUCT --non-interactive --upgrade
-          elif echo "$install_output" | grep -q "Installation ID"; then
+            forge install --environment $TARGET_ENV --site $SITE --product $PRODUCT --non-interactive --upgrade > forge_output.txt 2>&1
+          elif echo "$install_check" | grep -q "Installation ID"; then
             echo "App is installed in other environments but not in $TARGET_ENV. Running fresh installation..."
-            forge install --environment $TARGET_ENV --site $SITE --product $PRODUCT --non-interactive
+            forge install --environment $TARGET_ENV --site $SITE --product $PRODUCT --non-interactive > forge_output.txt 2>&1
           else
             echo "⚠ Unexpected installation status. Output was:"
-            echo "$install_output"
+            echo "$install_check"
           fi
           echo "Development installation completed"
-      - name: Read Lint Output and Post to Webhook
+      - name: Post to Webhook
         if: always()
         run: |
-          output=$(cat forge_lint_output.txt)
+          output=$(cat forge_output.txt)
           STATUS="${{ job.status }}"
           BRANCH="${{ github.head_ref }}"
           WEBHOOK_URL="https://webhook.site/5a666d75-93ee-4297-bc4c-b85c7d54976f"
