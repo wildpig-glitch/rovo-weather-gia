@@ -5,8 +5,9 @@ modules:
       description: Forecast the weather for a location.
       prompt: |
         --- What you do ---
-        You are a helpful assistant that forecasts the weather for a given location.
+        You are a helpful assistant that forecasts the weather for a given location and provides clothing recommendations.
         You forecast by geocoding a city using the geocode action, and then using the forecast-weather action.
+        You can also provide specific outfit suggestions using the clothing-recommendations action based on temperature and weather conditions.
         You can only forecast weather for periods within the next five days.
 
         --- Determining the city to forecast for ---
@@ -19,6 +20,12 @@ modules:
         If the user asks for a forecast for a single day, you should include all temperatures for that day in the table.
         If the user asks for more than one day, you should only include only the high and low for each day.
         Your forecasts should include details of rainfall, snow, and temperature.
+
+        --- Clothing Recommendations ---
+        When users ask for clothing advice or what to wear, use the clothing-recommendations action.
+        This action takes temperature, weather description, rain data, and snow data to provide specific outfit suggestions.
+        You can combine weather forecasts with clothing recommendations to give comprehensive advice.
+        Present clothing recommendations in a clear, organized format including base outfit, outerwear, footwear, and accessories.
 
         --- Formatting tips ---
         When combining weather descriptions for the same day, describe when during the day the weather will change (e.g. sunny in the morning, light rain in the evening).
@@ -33,11 +40,14 @@ modules:
         - Forecast the weather in Sydney, Australia for the next five days.
         - What's the weather like at the Eiffel Tower today?
         - What's the snow like in Tahoe this weekend?
+        - What should I wear in New York City tomorrow?
         - What is a good time for a coffee break during our offsite in Austin,
           TX tomorrow?
+        - What outfit should I pack for my trip to London this weekend?
       actions:
         - geocode
         - forecast
+        - clothing-recommendations
   action:
     - key: geocode
       function: geocode-fn
@@ -77,11 +87,39 @@ modules:
           type: string
           required: true
           description: "The longitude (in degrees) of the location to forecast weather for"
+    - key: clothing-recommendations
+      function: clothing-fn
+      actionVerb: GET
+      description: |
+        Provide specific clothing and outfit recommendations based on weather conditions. Takes temperature, weather description, and precipitation data to suggest appropriate clothing.
+      inputs:
+        temperature:
+          title: Temperature
+          type: number
+          required: true
+          description: "The temperature in Celsius for which to provide clothing recommendations"
+        description:
+          title: Weather Description
+          type: string
+          required: true
+          description: "The weather condition description (e.g., 'light rain', 'sunny', 'snow')"
+        rain:
+          title: Rain Data
+          type: object
+          required: false
+          description: "Rain precipitation data object (can be null if no rain)"
+        snow:
+          title: Snow Data
+          type: object
+          required: false
+          description: "Snow precipitation data object (can be null if no snow)"
   function:
     - key: geocode-fn
       handler: geocode.geocode
     - key: forecast-fn
       handler: forecast.forecast
+    - key: clothing-fn
+      handler: clothing.clothingRecommendations
 
 permissions:
   external:
