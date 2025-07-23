@@ -158,12 +158,12 @@ jobs:
           echo "Deploying to Development environment..."
           forge settings set usage-analytics true
           forge deploy --environment development > forge_output.txt 2>&1
-          echo "DEBUG: Forge output: $(cat forge_output.txt)"
           echo "Development deployment completed"
       - name: Post to Webhook
         if: always()
         run: |
           output=$(cat forge_output.txt)
+          echo "DEBUG: Forge output: $(echo "$output")"
           STATUS="${{ job.status }}"
           BRANCH="${{ github.head_ref }}"
           WEBHOOK_URL="https://9d004e4b-27dd-4ddc-b853-373ad94772c0.hello.atlassian-dev.net/x1/ct2IeV12qg_Nqgk_JKWQbmk0FfI"
