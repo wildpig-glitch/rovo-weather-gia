@@ -5,9 +5,20 @@ modules:
       description: Forecast the weather for a location.
       prompt: |
         --- What you do ---
-        You are a helpful assistant that forecasts the weather for a given location.
-        You forecast by geocoding a city using the geocode action, and then using the forecast-weather action.
+        You are a helpful assistant that forecasts the weather for a given location and provides personalized clothing suggestions.
+        You forecast by geocoding a city using the geocode action, and then using the forecast action.
+        You can provide clothing suggestions based on weather conditions using the clothing-suggestions action.
         You can only forecast weather for periods within the next five days.
+        
+        --- Multi-language support ---
+        You support clothing recommendations in multiple languages: English (en), Spanish (es), French (fr), and German (de).
+        If a user asks for clothing suggestions in a specific language, detect their language preference from context clues or explicit requests.
+        Pass the appropriate language code to the clothing-suggestions action.
+        Examples of language detection:
+        - Spanish: "Qué debo llevar?", "¿Qué ropa me recomendas?", requests mentioning Spanish cities
+        - French: "Que dois-je porter?", "Suggestions de vêtements", requests mentioning French cities
+        - German: "Was sollte ich anziehen?", "Kleidungsempfehlungen", requests mentioning German cities
+        If the user doesn't specify a language, default to English.
         
         --- Determining the city to forecast for ---
         If the user specifies a landmark, you should infer the city to forecast from that landmark.
@@ -19,6 +30,7 @@ modules:
         If the user asks for a forecast for a single day, you should include all temperatures for that day in the table.
         If the user asks for more than one day, you should only include only the high and low for each day.
         Your forecasts should include details of rainfall, snow, and temperature.
+        When providing clothing suggestions, present them in the requested language and organize them by category (layers, accessories, footwear).
 
         --- Formatting tips ---
         When combining weather descriptions for the same day, describe when during the day the weather will change (e.g. sunny in the morning, light rain in the evening).
@@ -34,9 +46,12 @@ modules:
         - What's the weather like at the Eiffel Tower today?
         - What's the snow like in Tahoe this weekend?
         - What is a good time for a coffee break during our offsite in Austin, TX tomorrow?
+        - What should I wear in Paris tomorrow? (in Spanish)
+        - Suggest clothing for the weather in Tokyo (en Français)
       actions:
         - geocode
-        - forecast  
+        - forecast
+        - clothing-suggestions  
   action:
     - key: geocode
       function: geocode-fn
@@ -75,11 +90,54 @@ modules:
           type: string
           required: true
           description: "The longitude (in degrees) of the location to forecast weather for"
+    - key: clothing-suggestions
+      function: clothing-suggestions-fn
+      actionVerb: GET
+      description: |
+        Generate personalized clothing suggestions based on weather conditions, season, and region. Supports multiple languages for clothing terms (en, es, fr, de).
+      inputs:
+        temperature:
+          title: Temperature
+          type: number
+          required: true
+          description: "The current temperature in Celsius"
+        description:
+          title: Weather Description
+          type: string
+          required: true
+          description: "Description of weather conditions (e.g., 'sunny', 'rainy', 'snowy')"
+        rain:
+          title: Rain
+          type: string
+          required: false
+          description: "Expected rainfall in millimeters (optional)"
+        snow:
+          title: Snow
+          type: string
+          required: false
+          description: "Expected snowfall in millimeters (optional)"
+        season:
+          title: Season
+          type: string
+          required: false
+          description: "Current season (spring, summer, autumn/fall, winter)"
+        region:
+          title: Region
+          type: string
+          required: false
+          description: "Geographic region for regional adjustments (optional)"
+        language:
+          title: Language
+          type: string
+          required: false
+          description: "Preferred language for clothing terms (en, es, fr, de). Defaults to English."
   function:
     - key: geocode-fn
       handler: geocode.geocode
     - key: forecast-fn
       handler: forecast.forecast
+    - key: clothing-suggestions-fn
+      handler: clothing.clothingSuggestions
 
 permissions:
   external:
